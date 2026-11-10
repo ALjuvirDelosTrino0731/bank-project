@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compass Bank - No-Login Appointment System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandLime: '#d8e63c',
+            brandLimeDark: '#c2d12c',
+            brandPurple: '#7b4db1',
+            brandPurpleHover: '#693e99'
+          },
+          fontFamily: {
+            serif: ['Merriweather', 'Georgia', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col justify-between">
+
+  <header class="w-full bg-brandLime h-24 border-b-2 border-black shadow-sm flex items-center px-6 md:px-12">
+    <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showPage('mainPage')">
+        <div class="w-10 h-10 bg-black text-brandLime rounded-full flex items-center justify-center font-bold">
+          <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="12" r="9" stroke-width="2.2"/>
+            <polygon points="16,8 14,14 8,16 10,10" stroke-width="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-serif font-black tracking-tight text-black">Compass Bank</h1>
+      </div>
+      <span class="text-xs md:text-sm font-semibold bg-black/10 text-black px-4 py-1.5 rounded-full border border-black/10">
+        No-Login Express Appointments
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 md:py-12 flex items-center">
+    <!-- MAIN LANDING PAGE -->
+    <section id="mainPage" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
+      <div class="lg:col-span-6 flex flex-col items-start space-y-6 pr-0 lg:pr-6">
+        <div class="flex items-center space-x-4">
+          <div class="w-20 h-20 md:w-24 md:h-24 bg-brandLime rounded-3xl card-shadow border-2 border-black/10 flex items-center justify-center text-black">
+            <svg class="w-12 h-12 md:w-16 md:h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" stroke-width="2"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3"/>
+              <polygon points="16,8 13.5,13.5 8,16 10.5,10.5" stroke-width="2" fill="#7b4db1"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="font-serif font-black text-3xl md:text-4xl text-black leading-tight">COMPASS BANK</h2>
+            <p class="font-sans font-semibold text-gray-600 text-sm md:text-base">Navigating your financial journey with ease</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="font-serif font-bold text-2xl md:text-3xl text-gray-900 leading-snug">Welcome to Compass Bank Appointment Services</h3>
+          <p class="text-gray-700 text-base md:text-lg leading-relaxed font-sans">
+            Skip the line at your local branch! Book, edit, or cancel your banking appointment in under a minute—no login or password required.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-2">
+          <div class="flex items-center space-x-2 text-sm font-medium text-gray-800 bg-white p-3 rounded-2xl border border-gray-200 shadow-sm">
+            <span class="text-brandPurple text-lg">✓</span><span>No Account Login Needed</span>
+          </div>
+          <div class="flex items-center space-x-2 text-sm font-medium text-gray-800 bg-white p-3 rounded-2xl border border-gray-200 shadow-sm">
+            <span class="text-brandPurple text-lg">✓</span><span>Fast & Secure Reservation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 w-full">
+        <div class="bg-brandLime rounded-3xl p-6 md:p-10 card-shadow border-2 border-black/5 space-y-5">
+          <h3 class="font-serif font-bold text-2xl text-center text-black mb-6">What would you like to do?</h3>
+
+          <button onclick="showPage('appointmentFormPage')" class="w-full bg-brandPurple hover:bg-brandPurpleHover text-white text-left p-5 md:p-6 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between group border border-purple-900/20">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center font-bold text-2xl">+</div>
+              <div>
+                <h4 class="font-serif font-bold text-lg md:text-xl text-white">Schedule a new appointment</h4>
+                <p class="text-xs md:text-sm text-purple-100 font-sans mt-0.5">Book cash deposits, checks, or teller services</p>
+              </div>
+            </div>
+            <span class="text-2xl group-hover:translate-x-1 transition-transform">→</span>
+          </button>
+
+          <button onclick="openLookupModal('edit')" class="w-full bg-white hover:bg-gray-50 text-black text-left p-5 md:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between group border border-black/10">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 bg-brandLime/40 rounded-xl flex items-center justify-center text-black">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-serif font-bold text-lg text-black">Edit an appointment</h4>
+                <p class="text-xs md:text-sm text-gray-600 font-sans mt-0.5">Modify date, time, or transaction items</p>
+              </div>
+            </div>
+            <span class="text-2xl text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
+          </button>
+
+          <button onclick="openLookupModal('cancel')" class="w-full bg-white hover:bg-gray-50 text-black text-left p-5 md:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between group border border-black/10">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-serif font-bold text-lg text-black">Cancel an appointment</h4>
+                <p class="text-xs md:text-sm text-gray-600 font-sans mt-0.5">Remove your scheduled branch visit</p>
+              </div>
+            </div>
+            <span class="text-2xl text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPOINTMENT FORM PAGE -->
+    <section id="appointmentFormPage" class="w-full hidden">
+      <div class="mb-6 flex items-center justify-between">
+        <button type="button" onclick="showPage('mainPage')" class="inline-flex items-center space-x-2 text-black font-serif font-bold bg-brandLime px-4 py-2 rounded-xl border border-black/10 shadow-sm hover:bg-brandLimeDark transition-colors">
+          <span>← Back to Main Menu</span>
+        </button>
+        <span class="text-sm font-semibold text-gray-500 font-sans">Step 2 of 2: Details & Transactions</span>
+      </div>
+
+      <form id="appointmentForm" onsubmit="handleFormSubmit(event)">
+        <div class="form-column flex flex-col gap-10 md:gap-12">
+          <div class="flex flex-col">
+            <h2 class="text-center font-serif text-2xl md:text-3xl font-bold mb-6 text-black">Appointment Details</h2>
+            <div class="bg-brandLime rounded-3xl p-6 md:p-8 card-shadow space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label for="email" class="sm:col-span-5 font-serif font-bold text-base md:text-lg text-black">Email address</label>
+                <div class="sm:col-span-7"><input type="text" id="email" required inputmode="email" autocomplete="email" data-gmail-only placeholder="name@gmail.com" pattern="[A-Za-z0-9._%+\-]+@[Gg][Mm][Aa][Ii][Ll]\.[Cc][Oo][Mm]" title="Please enter a valid Gmail address (e.g. name@gmail.com)" class="pill-input w-full bg-white text-gray-800 px-5 py-3 text-base border-none font-sans font-medium"></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label for="contactNumber" class="sm:col-span-5 font-serif font-bold text-base md:text-lg text-black">Contact Number:</label>
+                <div class="sm:col-span-7"><input type="tel" id="contactNumber" required placeholder="09XXXXXXXXX" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" data-phone-09 title="Contact number must be 11 digits and start with 09 (e.g. 09123456789)" class="pill-input w-full bg-white text-gray-800 px-5 py-3 text-base border-none font-sans font-medium"></div>
+              </div>
+              <div class="relative flex flex-col gap-3">
+                <label for="appointmentDate" class="font-serif font-bold text-base md:text-lg text-black">Appointment Date</label>
+                <div class="traffic-panel">
+                  <div id="trafficCalendar"></div>
+                  <ul class="traffic-legend" aria-label="Traffic legend">
+                    <li><i class="cal-dot low-dot"></i><span><strong>Low Traffic</strong> – Fewer customers expected. Recommended time to visit.</span></li>
+                    <li><i class="cal-dot moderate-dot"></i><span><strong>Moderate Traffic</strong> – An average number of customers expected.</span></li>
+                    <li><i class="cal-dot high-dot"></i><span><strong>High Traffic</strong> – More customers expected; longer waits possible.</span></li>
+                  </ul>
+                </div>
+                <div id="trafficMessage" class="traffic-message" role="status" aria-live="polite">Select a date to see the expected bank traffic.</div>
+                <input type="text" id="appointmentDate" required readonly tabindex="-1" autocomplete="off" class="calendar-date-input">
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label for="appointmentTime" class="sm:col-span-5 font-serif font-bold text-base md:text-lg text-black">Appointment Time</label>
+                <div class="sm:col-span-7 relative">
+                  <select id="appointmentTime" required class="pill-input w-full bg-white text-gray-800 px-5 py-3 pr-10 text-base border-none font-sans font-medium appearance-none cursor-pointer">
+                    <option value="9:00 AM – 10:00 AM">9:00 AM – 10:00 AM</option>
+                    <option value="10:00 AM – 11:00 AM">10:00 AM – 11:00 AM</option>
+                    <option value="11:00 AM – 12:00 PM">11:00 AM – 12:00 PM</option>
+                    <option value="12:00 PM – 1:00 PM">12:00 PM – 1:00 PM</option>
+                    <option value="1:00 PM – 2:00 PM">1:00 PM – 2:00 PM</option>
+                    <option value="2:00 PM – 3:00 PM">2:00 PM – 3:00 PM</option>
+                    <option value="3:00 PM – 4:00 PM">3:00 PM – 4:00 PM</option>
+                    <option value="4:00 PM – 5:00 PM">4:00 PM – 5:00 PM</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <h2 class="text-center font-serif text-2xl md:text-3xl font-bold mb-6 text-black">Transaction Details</h2>
+            <div class="bg-white rounded-3xl border-4 border-brandLime p-4 md:p-6 card-shadow">
+              <div id="transactionsContainer" class="space-y-6"></div>
+              <div class="mt-6 flex justify-end">
+                <button type="button" onclick="addTransactionCard()" class="bg-brandPurple hover:bg-brandPurpleHover text-white font-serif font-bold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transform active:scale-95 transition-all duration-150 flex items-center space-x-2">
+                  <span class="text-xl leading-none">+</span><span>Add another transaction</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 md:mt-12 flex justify-center">
+          <button type="submit" id="submitBtn" class="bg-brandPurple hover:bg-brandPurpleHover text-white font-serif font-bold text-lg md:text-xl px-8 sm:px-12 py-4 rounded-full shadow-lg hover:shadow-xl transform active:scale-95 transition-all duration-150">Confirm Appointment Reservation</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="w-full bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
+    © 2026 Compass Bank. All rights reserved. Express No-Login Branch Scheduling System.
+  </footer>
+
+  <!-- LOOKUP MODAL -->
+  <div id="lookupModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border-4 border-brandLime">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="lookupModalTitle" class="font-serif font-bold text-2xl text-gray-900">Lookup Appointment</h3>
+        <button onclick="closeLookupModal()" class="text-gray-400 hover:text-black font-bold text-xl">✕</button>
+      </div>
+      <p class="text-gray-600 text-sm mb-6">Enter your reference code and contact details to manage your existing reservation.</p>
+      <form onsubmit="handleLookupSubmit(event)" class="space-y-4">
+        <div>
+          <label for="lookupRef" class="block font-serif font-bold text-sm text-gray-800 mb-1">Reference Code</label>
+          <input type="text" id="lookupRef" required placeholder="e.g. CP-89240" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-3 border border-gray-200 font-mono text-sm">
+        </div>
+        <div>
+          <label for="lookupContact" class="block font-serif font-bold text-sm text-gray-800 mb-1">Email address or Contact</label>
+          <input type="text" id="lookupContact" required placeholder="Registered email or phone" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-3 border border-gray-200 text-sm">
+        </div>
+        <div class="pt-4 flex space-x-3">
+          <button type="button" onclick="closeLookupModal()" class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-serif font-bold py-3 rounded-full transition-colors text-sm">Cancel</button>
+          <button type="submit" id="lookupSubmitBtn" class="w-1/2 bg-brandPurple hover:bg-brandPurpleHover text-white font-serif font-bold py-3 rounded-full transition-colors text-sm shadow-md">Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div id="successModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl transform transition-all border-4 border-brandLime">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brandLime text-black rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">✓</div>
+        <h3 id="modalHeaderTitle" class="font-serif font-bold text-2xl text-gray-900 mb-1">Appointment Confirmed!</h3>
+        <p id="modalHeaderSub" class="text-gray-600 text-sm mb-4">Your appointment details are saved below.</p>
+        <div class="bg-brandLime/30 border border-brandLimeDark rounded-xl p-3 mb-6 inline-block">
+          <span class="text-xs text-gray-600 block uppercase font-bold tracking-wider">Reference Code</span>
+          <span id="modalRefCode" class="text-xl font-mono font-bold text-black"></span>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-4 mb-6 text-sm text-gray-800 space-y-3 font-sans border border-gray-100">
+        <div class="flex justify-between border-b pb-2"><span class="font-semibold text-gray-500">Email:</span><span id="modalEmail" class="font-medium text-gray-900"></span></div>
+        <div class="flex justify-between border-b pb-2"><span class="font-semibold text-gray-500">Contact:</span><span id="modalContact" class="font-medium text-gray-900"></span></div>
+        <div class="flex justify-between border-b pb-2"><span class="font-semibold text-gray-500">Date & Time:</span><span id="modalDateTime" class="font-medium text-gray-900"></span></div>
+        <div><span class="font-semibold text-gray-500 block mb-2">Transactions Scheduled:</span><ul id="modalTransactionsList" class="list-disc pl-5 space-y-1 font-medium text-black"></ul></div>
+      </div>
+      <button type="button" onclick="closeSuccessModal()" class="w-full bg-brandPurple hover:bg-brandPurpleHover text-white font-serif font-bold py-3.5 rounded-full shadow-md transition-colors">Back to Home</button>
+    </div>
+  </div>
+
+  <script src="js/transactions.js"></script>
+  <script src="js/appointment.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/calendar.js"></script>
+</body>
+</html>

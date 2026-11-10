@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compass Bank - Admin Portal</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Application JavaScript -->
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+<!-- TOAST NOTIFICATION SYSTEM -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-3 pointer-events-none"></div>
+
+  <!-- ==================== VIEW 1: ADMIN LOGIN PAGE ==================== -->
+  <section id="loginView" class="min-h-screen flex flex-col justify-between bg-gray-50">
+    <!-- Header -->
+    <header class="w-full bg-brandLime h-20 border-b-2 border-black shadow-sm flex items-center px-6 md:px-12">
+      <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-black text-brandLime rounded-full flex items-center justify-center font-bold shadow-md">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="9" stroke-width="2.2"/>
+              <polygon points="16,8 14,14 8,16 10,10" stroke-width="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <h1 class="text-xl md:text-2xl font-serif font-black tracking-tight text-black">Compass Bank</h1>
+        </div>
+        <span class="text-xs md:text-sm font-bold bg-black text-brandLime px-4 py-1.5 rounded-full border border-black/10 tracking-wide">
+          Admin Portal
+        </span>
+      </div>
+    </header>
+
+    <!-- Login Form Card -->
+    <div class="flex-grow flex items-center justify-center px-4 py-12">
+      <div class="max-w-md w-full">
+        <div class="bg-brandLime rounded-3xl p-8 md:p-10 card-shadow border-2 border-black/10 space-y-6">
+          <div class="text-center space-y-3">
+            <div class="w-16 h-16 bg-black text-brandLime rounded-2xl mx-auto flex items-center justify-center shadow-lg border-2 border-brandLime">
+              <svg class="w-10 h-10 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="12" cy="12" r="9" stroke-width="2.2"/>
+                <polygon points="16,8 14,14 8,16 10,10" stroke-width="2" fill="#d8e63c"/>
+              </svg>
+            </div>
+            <h2 class="font-serif font-black text-2xl md:text-3xl text-black">Admin Authentication</h2>
+            <p class="text-sm font-medium text-gray-800">Sign in to manage appointments & traffic predictions</p>
+          </div>
+
+          <form onsubmit="handleLogin(event)" class="space-y-4">
+            <div>
+              <label for="loginUser" class="block font-serif font-bold text-sm text-black mb-1.5">Email or Username</label>
+              <input type="text" id="loginUser" required value="admin@compassbank.com" class="pill-input w-full bg-white text-gray-900 px-5 py-3 text-sm border-none font-medium placeholder-gray-400">
+            </div>
+
+            <div>
+              <label for="loginPass" class="block font-serif font-bold text-sm text-black mb-1.5">Password</label>
+              <div class="relative">
+                <input type="password" id="loginPass" required value="admin123" class="pill-input w-full bg-white text-gray-900 pl-5 pr-12 py-3 text-sm border-none font-medium">
+                <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none p-1">
+                  <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-brandPurple hover:bg-brandPurpleHover text-white font-serif font-bold py-3.5 px-6 rounded-full shadow-lg hover:shadow-xl transform active:scale-98 transition-all duration-150 flex items-center justify-center space-x-2 text-base mt-4">
+              <span>Login to Admin Dashboard</span>
+              <span>→</span>
+            </button>
+          </form>
+
+          <div class="bg-white/60 backdrop-blur-xs p-3 rounded-2xl border border-black/5 text-center text-xs text-gray-700">
+            <span class="font-bold">Demo Credentials:</span> admin@compassbank.com / admin123
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500 font-sans">
+      © 2026 Compass Bank Administrative Systems. All rights reserved.
+    </footer>
+  </section>
+
+  <!-- ==================== VIEW 2: ADMIN DASHBOARD MAIN LAYOUT ==================== -->
+  <div id="dashboardView" class="min-h-screen flex flex-col hidden bg-gray-100">
+    <!-- Top Navigation Bar -->
+    <header class="w-full bg-brandLime border-b-2 border-black sticky top-0 z-30 shadow-sm">
+      <div class="w-full px-4 md:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <button onclick="toggleMobileSidebar()" class="lg:hidden text-black focus:outline-none p-1 rounded-lg border border-black/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div class="flex items-center space-x-3 cursor-pointer" onclick="switchNavTab('dashboard')">
+            <div class="w-10 h-10 bg-black text-brandLime rounded-full flex items-center justify-center font-bold shadow-sm">
+              <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="12" cy="12" r="9" stroke-width="2.2"/>
+                <polygon points="16,8 14,14 8,16 10,10" stroke-width="2" fill="currentColor"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-serif font-black tracking-tight text-black leading-none">Compass Bank</h1>
+              <span class="text-xs font-semibold text-purple-950 uppercase tracking-wider">Branch Admin Portal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right User Controls & Date/Time -->
+        <div class="flex items-center space-x-4 md:space-x-6">
+          <div class="hidden md:flex flex-col items-end border-r border-black/10 pr-6">
+            <div id="currentClock" class="font-mono text-xs md:text-sm font-bold text-black"></div>
+            <div id="currentDate" class="text-xs text-gray-800 font-medium"></div>
+          </div>
+
+          <div class="flex items-center space-x-3 bg-black/10 py-1.5 px-3 rounded-full border border-black/10">
+            <div class="relative">
+              <div class="w-8 h-8 rounded-full bg-brandPurple text-white font-serif font-bold flex items-center justify-center text-sm shadow">
+                AU
+              </div>
+              <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+            </div>
+            <div class="hidden sm:block text-left pr-1">
+              <p class="text-xs font-bold text-black leading-tight">Admin User</p>
+              <p class="text-[10px] text-gray-700 font-medium">Head Branch Manager</p>
+            </div>
+          </div>
+
+          <button onclick="handleLogout()" title="Logout" class="bg-black hover:bg-gray-800 text-brandLime p-2 rounded-xl transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-grow flex overflow-hidden">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col justify-between hidden lg:flex z-20">
+        <div class="p-4 space-y-2">
+          <div class="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Main Navigation</div>
+
+          <button id="nav-dashboard" onclick="switchNavTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm transition-all duration-150 bg-brandLime text-black shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <span>Dashboard</span>
+          </button>
+
+          <button id="nav-appointments" onclick="switchNavTab('appointments')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            <span>Appointments</span>
+          </button>
+
+          <button id="nav-calendar" onclick="switchNavTab('calendar')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Calendar</span>
+          </button>
+
+          <button id="nav-traffic" onclick="switchNavTab('traffic')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+            <span>Traffic Prediction</span>
+          </button>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CONTENT CONTAINER -->
+      <main class="flex-grow p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-8">
+
+        <!-- ================= SECTION 1: DASHBOARD OVERVIEW ================= -->
+        <section id="section-dashboard" class="space-y-8">
+          <!-- Welcome Bar -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="font-serif font-black text-2xl md:text-3xl text-gray-900">Dashboard Overview</h2>
+              <p class="text-gray-600 text-sm font-sans mt-1">Real-time express appointment monitoring & traffic analytics.</p>
+            </div>
+
+          </div>
+
+          <!-- SUMMARY CARDS GRID -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Appointments -->
+            <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow flex items-center justify-between">
+              <div>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Today</p>
+                <h3 id="statTotal" class="font-serif font-black text-3xl text-gray-900 mt-1">12</h3>
+                <span class="inline-block mt-2 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">+18% vs yesterday</span>
+              </div>
+              <div class="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-800">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+            </div>
+
+            <!-- Pending Appointments -->
+            <div class="bg-white rounded-3xl p-6 border-l-4 border-l-amber-400 border-gray-200 card-shadow flex items-center justify-between">
+              <div>
+                <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Pending Review</p>
+                <h3 id="statPending" class="font-serif font-black text-3xl text-amber-600 mt-1">4</h3>
+                <span class="inline-block mt-2 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full">Requires Admin Action</span>
+              </div>
+              <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+            </div>
+
+            <!-- Approved Appointments -->
+            <div class="bg-white rounded-3xl p-6 border-l-4 border-l-emerald-500 border-gray-200 card-shadow flex items-center justify-between">
+              <div>
+                <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Approved Slots</p>
+                <h3 id="statApproved" class="font-serif font-black text-3xl text-emerald-600 mt-1">6</h3>
+                <span class="inline-block mt-2 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Confirmed visits</span>
+              </div>
+              <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+            </div>
+
+            <!-- Rejected Appointments -->
+            <div class="bg-white rounded-3xl p-6 border-l-4 border-l-red-500 border-gray-200 card-shadow flex items-center justify-between">
+              <div>
+                <p class="text-xs font-bold text-red-700 uppercase tracking-wider">Rejected</p>
+                <h3 id="statRejected" class="font-serif font-black text-3xl text-red-600 mt-1">2</h3>
+                <span class="inline-block mt-2 text-xs font-medium text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full">Slot conflict / issue</span>
+              </div>
+              <div class="w-12 h-12 bg-red-100 text-red-700 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- TRAFFIC CLASSIFICATION BANNER -->
+          <div class="bg-brandLime rounded-3xl p-6 border-2 border-black/10 card-shadow">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div class="flex items-start space-x-4">
+                <div class="w-12 h-12 bg-black text-brandLime rounded-2xl flex items-center justify-center font-bold flex-shrink-0 mt-1">
+                  ⚡
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs font-black uppercase tracking-wider bg-black text-brandLime px-2.5 py-0.5 rounded-full">Traffic Forecast</span>
+                    <span class="text-xs font-bold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">HEAVY TRAFFIC EXPECTED</span>
+                  </div>
+                  <h3 class="font-serif font-bold text-xl text-black mt-1">Peak Volume Predicted: 10:00 AM - 2:00 PM</h3>
+                  <p class="text-xs md:text-sm text-gray-900 font-sans mt-1">
+                    Customer arrivals are expected to surge around 11:30 AM due to lunch-hour check deposits and cash withdrawals.
+                  </p>
+                </div>
+              </div>
+              <div class="bg-white/90 p-4 rounded-2xl border border-black/10 w-full md:w-auto text-center flex-shrink-0">
+                <p class="text-xs font-bold text-gray-500 uppercase">Recommended Action</p>
+                <p class="font-serif font-bold text-base text-brandPurple">Open Tellers 4 & 5</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- HOURLY TRAFFIC PREDICTION CHART CARD -->
+          <div class="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 card-shadow space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="font-serif font-bold text-xl text-gray-900">Hourly Customer Traffic Prediction</h3>
+                <p class="text-xs text-gray-500">Predicted customer volume vs actual arrivals for branch hours (8:00 AM - 5:00 PM)</p>
+              </div>
+              <div class="flex items-center space-x-4 text-xs font-semibold">
+                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandPurple inline-block"></span><span>Predicted Traffic</span></span>
+                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandLimeDark inline-block"></span><span>Actual Visits</span></span>
+              </div>
+            </div>
+            <div class="relative h-64 md:h-72 w-full">
+              <canvas id="trafficPredictionChart"></canvas>
+            </div>
+          </div>
+
+          <!-- TODAY'S APPOINTMENT QUICK LIST -->
+          <div class="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 card-shadow space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-serif font-bold text-xl text-gray-900">Today's Appointment Schedule</h3>
+                <p class="text-xs text-gray-500">Quick view of express reservations scheduled for today</p>
+              </div>
+              <button onclick="switchNavTab('appointments')" class="text-xs font-serif font-bold text-brandPurple hover:underline">
+                View Full Appointments Table →
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider font-semibold">
+                    <th class="pb-3">Ref Code</th>
+                    <th class="pb-3">Account Number</th>
+                    <th class="pb-3">Time</th>
+                    <th class="pb-3">Transaction</th>
+                    <th class="pb-3">Status</th>
+                    <th class="pb-3 text-right">Quick Action</th>
+                  </tr>
+                </thead>
+                <tbody id="quickListTable" class="divide-y divide-gray-100">
+                  <!-- Dynamic rows via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SECTION 2: APPOINTMENTS MANAGEMENT ================= -->
+        <section id="section-appointments" class="space-y-6 hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="font-serif font-black text-2xl md:text-3xl text-gray-900">Appointments Management</h2>
+              <p class="text-gray-600 text-sm font-sans mt-1">Review, approve, reject, or filter customer branch reservations.</p>
+            </div>
+          </div>
+
+          <!-- Filter Controls Bar -->
+          <div class="bg-white rounded-3xl p-4 border border-gray-200 card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Filter Tabs -->
+            <div class="flex items-center space-x-1 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+              <button onclick="setAppointmentFilter('All')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold transition-all bg-brandPurple text-white">All (<span id="countAll">0</span>)</button>
+              <button onclick="setAppointmentFilter('Pending')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Pending (<span id="countPending">0</span>)</button>
+              <button onclick="setAppointmentFilter('Approved')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Approved (<span id="countApproved">0</span>)</button>
+              <button onclick="setAppointmentFilter('Rejected')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Rejected (<span id="countRejected">0</span>)</button>
+              <button onclick="setAppointmentFilter('Completed')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Completed (<span id="countCompleted">0</span>)</button>
+            </div>
+
+            <!-- Search Field -->
+            <div class="relative w-full md:w-64">
+              <input type="text" id="appointmentSearchInput" onkeyup="renderAppointmentsTable()" placeholder="Search Ref or Account #..." class="pill-input w-full bg-gray-50 text-gray-900 pl-10 pr-4 py-2 text-xs border border-gray-200">
+              <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+          </div>
+
+          <!-- APPOINTMENTS MAIN DATA TABLE -->
+          <div class="bg-white rounded-3xl border border-gray-200 card-shadow overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th class="px-6 py-4">Ref Code</th>
+                    <th class="px-6 py-4">Account Number</th>
+                    <th class="px-6 py-4">Date & Time Slot</th>
+                    <th class="px-6 py-4">Transaction Service</th>
+                    <th class="px-6 py-4">Amount</th>
+                    <th class="px-6 py-4">Check Number</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="fullAppointmentsTable" class="divide-y divide-gray-100">
+                  <!-- Dynamic rows rendered via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SECTION 3: CALENDAR & SCHEDULING ================= -->
+        <section id="section-calendar" class="space-y-6 hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="font-serif font-black text-2xl md:text-3xl text-gray-900">Interactive Calendar</h2>
+              <p class="text-gray-600 text-sm font-sans mt-1">Monthly, weekly, and daily view of branch appointment schedules.</p>
+            </div>
+            <!-- Calendar controls -->
+            <div class="flex items-center space-x-2 bg-white p-1.5 rounded-full border border-gray-200 shadow-sm">
+              <button onclick="setCalendarView('month')" id="calViewMonth" class="px-4 py-1.5 rounded-full text-xs font-serif font-bold bg-brandPurple text-white transition-all">Month</button>
+              <button onclick="setCalendarView('week')" id="calViewWeek" class="px-4 py-1.5 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Week</button>
+              <button onclick="setCalendarView('day')" id="calViewDay" class="px-4 py-1.5 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Day</button>
+            </div>
+          </div>
+
+          <!-- Calendar Navigation Header -->
+          <div class="bg-white rounded-3xl p-4 border border-gray-200 card-shadow flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <button onclick="changeCalendarMonth(-1)" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-sm text-gray-800">←</button>
+              <h3 id="calendarMonthLabel" class="font-serif font-bold text-xl text-black">November 2026</h3>
+              <button onclick="changeCalendarMonth(1)" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-sm text-gray-800">→</button>
+            </div>
+
+            <!-- Legend -->
+            <div class="hidden md:flex items-center space-x-4 text-xs font-medium">
+              <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span>Approved</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-amber-400"></span><span>Pending</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-red-500"></span><span>Rejected</span></span>
+            </div>
+          </div>
+
+          <!-- CALENDAR CONTAINER -->
+          <div class="bg-white rounded-3xl border border-gray-200 card-shadow overflow-hidden p-4">
+            <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SECTION 4: TRAFFIC PREDICTION ANALYTICS ================= -->
+        <section id="section-traffic" class="space-y-6 hidden">
+          <div>
+            <h2 class="font-serif font-black text-2xl md:text-3xl text-gray-900">Traffic Prediction & Analytics</h2>
+            <p class="text-gray-600 text-sm font-sans mt-1">Branch congestion insights and capacity planning forecast.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Analytics Chart 1: Transaction Breakdown -->
+            <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
+              <h3 class="font-serif font-bold text-lg text-gray-900">Volume by Transaction Type</h3>
+              <p class="text-xs text-gray-500">Distribution of upcoming customer services</p>
+              <div class="relative h-64 flex items-center justify-center">
+                <canvas id="transactionPieChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Analytics Chart 2: Congestion Heat Forecast -->
+            <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
+              <h3 class="font-serif font-bold text-lg text-gray-900">Branch Capacity Breakdown</h3>
+              <p class="text-xs text-gray-500">Hourly counter load capacity index</p>
+              <div class="relative h-64">
+                <canvas id="capacityBarChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capacity Recommendations Box -->
+          <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
+            <h3 class="font-serif font-bold text-lg text-gray-900">Smart Staffing Recommendations</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 space-y-1">
+                <p class="text-xs font-bold text-amber-700 uppercase">10:00 AM - 12:00 PM</p>
+                <p class="font-serif font-bold text-gray-900">High Teller Demand</p>
+                <p class="text-xs text-gray-600">Deploy 2 backup tellers for check deposit verification.</p>
+              </div>
+              <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 space-y-1">
+                <p class="text-xs font-bold text-emerald-700 uppercase">1:00 PM - 3:00 PM</p>
+                <p class="font-serif font-bold text-gray-900">Optimal Express Flow</p>
+                <p class="text-xs text-gray-600">Standard counter operations expected to meet SLA.</p>
+              </div>
+              <div class="bg-purple-50 rounded-2xl p-4 border border-purple-200 space-y-1">
+                <p class="text-xs font-bold text-brandPurple uppercase">3:30 PM - 5:00 PM</p>
+                <p class="font-serif font-bold text-gray-900">Closing Cash Rush</p>
+                <p class="text-xs text-gray-600">Assign express queue manager for rapid ticket processing.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- MODAL 1: APPOINTMENT DETAILS & STATUS MODAL -->
+  <div id="detailsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border-4 border-brandLime space-y-6">
+      <div class="flex justify-between items-start">
+        <div>
+          <span id="detailStatusBadge" class="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-2">Pending</span>
+          <h3 id="detailRefCode" class="font-serif font-bold text-2xl text-gray-900">CP-89240</h3>
+        </div>
+        <button onclick="closeModal('detailsModal')" class="text-gray-400 hover:text-black font-bold text-xl">✕</button>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-4 text-xs text-gray-800 space-y-2 border border-gray-100">
+        <div class="flex justify-between"><span class="font-semibold text-gray-500">Account Number:</span><span id="detailAccountNumber" class="font-bold text-gray-900 font-mono"></span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-500">Email:</span><span id="detailEmail" class="font-medium text-gray-900"></span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-500">Contact Number:</span><span id="detailContact" class="font-medium text-gray-900"></span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-500">Scheduled Date & Time:</span><span id="detailDateTime" class="font-bold text-brandPurple"></span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-500">Transaction Amount:</span><span id="detailAmount" class="font-bold text-emerald-700"></span></div>
+        <div id="detailCheckNumberRow" class="flex justify-between hidden"><span class="font-semibold text-gray-500">Check Number:</span><span id="detailCheckNumber" class="font-bold text-brandPurple font-mono"></span></div>
+      </div>
+
+      <div>
+        <h4 class="font-serif font-bold text-sm text-black mb-2">Transaction Details:</h4>
+        <div id="detailTransactionsList" class="bg-brandLime/20 rounded-2xl p-4 border border-brandLimeDark space-y-2 text-xs font-mono">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-2 border-t border-gray-100 space-y-3">
+        <p class="text-xs font-bold text-gray-500 uppercase">Update Status:</p>
+        <div id="detailActionButtons" class="flex flex-wrap justify-center items-center gap-2">
+          <!-- Dynamically populated based on current status -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: MANUAL APPOINTMENT CREATION -->
+  <div id="newAppointmentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border-4 border-brandLime space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-serif font-bold text-xl text-gray-900">Add Manual Appointment</h3>
+        <button onclick="closeModal('newAppointmentModal')" class="text-gray-400 hover:text-black font-bold text-xl">✕</button>
+      </div>
+
+      <form onsubmit="handleCreateManualAppointment(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Account Number</label>
+          <input type="text" id="newCustAccNum" required placeholder="e.g. 1123415123" pattern="[0-9]{8,17}" title="Valid account number (8-17 digits)" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-2.5 text-xs border border-gray-200 font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Email Address</label>
+          <input type="email" id="newCustEmail" required placeholder="customer@example.com" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-2.5 text-xs border border-gray-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Contact Phone</label>
+          <input type="tel" id="newCustPhone" required placeholder="0917 123 4567" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-2.5 text-xs border border-gray-200">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Date</label>
+            <input type="date" id="newCustDate" required class="pill-input w-full bg-gray-50 text-gray-900 px-3 py-2 text-xs border border-gray-200">
+          </div>
+          <div>
+            <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Time Slot</label>
+            <select id="newCustTime" required class="pill-input w-full bg-gray-50 text-gray-900 px-3 py-2 text-xs border border-gray-200">
+              <option value="09:00">09:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="13:00">01:00 PM</option>
+              <option value="14:00">02:00 PM</option>
+              <option value="15:00">03:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Transaction Service</label>
+          <select id="newCustType" required onchange="toggleCheckNumberField()" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-2.5 text-xs border border-gray-200">
+            <option value="Deposit Cash">Deposit Cash</option>
+            <option value="Deposit Check">Deposit Check</option>
+            <option value="Withdraw Cash">Withdraw Cash</option>
+            <option value="Withdraw Check">Withdraw Check</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Transaction Amount (₱)</label>
+          <input type="number" id="newCustAmount" required min="0.01" step="0.01" placeholder="Enter transaction amount" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-2.5 text-xs border border-gray-200">
+        </div>
+
+        <div id="newCheckNumberField" class="hidden">
+          <label class="block text-xs font-serif font-bold text-gray-700 mb-1">Check Number</label>
+          <input type="text" id="newCustCheckNumber" placeholder="Enter check number" maxlength="30" class="pill-input w-full bg-gray-50 text-gray-900 px-4 py-2.5 text-xs border border-gray-200 font-mono">
+        </div>
+
+        <div class="pt-3 flex space-x-3">
+          <button type="button" onclick="closeModal('newAppointmentModal')" class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-serif font-bold py-2.5 rounded-full text-xs">Cancel</button>
+          <button type="submit" class="w-1/2 bg-brandPurple hover:bg-brandPurpleHover text-white font-serif font-bold py-2.5 rounded-full text-xs shadow-md">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONFLICT WARNING DIALOG -->
+  <div id="conflictModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 border-4 border-red-500 shadow-2xl">
+      <div class="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+        ⚠️
+      </div>
+      <h3 class="font-serif font-bold text-xl text-gray-900">Slot Conflict Prevented!</h3>
+      <p id="conflictMessageText" class="text-xs text-gray-600">
+        Another approved appointment is already scheduled for this exact time slot. System rules prevent double-booking.
+      </p>
+      <button onclick="closeModal('conflictModal')" class="w-full bg-red-600 hover:bg-red-700 text-white font-serif font-bold py-2.5 rounded-full text-xs transition-colors">
+        Acknowledge & Dismiss
+      </button>
+    </div>
+  </div>
+
+  
+</body>
+</html>

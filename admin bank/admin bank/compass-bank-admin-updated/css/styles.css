@@ -1,0 +1,77 @@
+/* ========================================
+   COMPASS BANK ADMIN PORTAL - CUSTOM CSS
+======================================== */
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Card Shadow */
+.card-shadow {
+    box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.12),
+        0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+/* Pill Input */
+.pill-input {
+    border-radius: 9999px;
+    box-shadow:
+        inset 0 2px 4px 0 rgba(0, 0, 0, 0.05),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease-in-out;
+}
+
+.pill-input:focus {
+    outline: none;
+    box-shadow:
+        inset 0 1px 2px 0 rgba(0, 0, 0, 0.04),
+        0 0 0 3px rgba(123, 77, 177, 0.4);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c2d12c;
+    border-radius: 4px;
+}
+
+/* Calendar Cell */
+.calendar-cell {
+    min-height: 110px;
+}
+
+/* Center Appointment Action Buttons */
+#detailActionButtons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+#detailActionButtons > button {
+    width: 160px;
+    max-width: 100%;
+    min-height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 0;
+}
+
+@media (max-width: 400px) {
+    #detailActionButtons > button {
+        width: 140px;
+    }
+}
