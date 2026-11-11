@@ -545,6 +545,24 @@ function renderAppointmentsTable() {
         await refreshVerifiedVisits();
       } catch(e){showToast(e.message,'error');}finally{button.disabled=false;}
     }
+    async function downloadVerifiedVisitsCSV(){
+      if(!employeeToken){showToast('Employee login required','error');return;}
+      const d=new Date(),start=new Date(d.getFullYear(),d.getMonth(),1);
+      const pad=n=>String(n).padStart(2,'0'),fmt=x=>[x.getFullYear(),pad(x.getMonth()+1),pad(x.getDate())].join('-');
+      try{
+        const response=await fetch(employeeApi+'/visits/hourly.csv?from='+fmt(start)+'&to='+fmt(d),{
+          headers:{Authorization:'Bearer '+employeeToken}
+        });
+        if(!response.ok){
+          const error=await response.json().catch(()=>({}));
+          throw new Error(error.message||'CSV download failed');
+        }
+        const blob=await response.blob(),url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download='compass_verified_hourly_visits.csv';
+        document.body.append(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }catch(e){showToast(e.message,'error');}
+    }
     async function refreshVerifiedVisits(){
       const table=document.getElementById('verifiedVisitHourlyRows');
       const summary=document.getElementById('verifiedVisitTotals');
