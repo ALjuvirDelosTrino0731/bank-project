@@ -567,83 +567,94 @@ function renderAppointmentsTable() {
       document.getElementById(modalId).classList.remove('flex');
     }
 
-    // CALENDAR GENERATION LOGIC
+    // Phase 4P: original employee calendar now displays appointments and external experimental traffic together.
+    let researchScenarioData = null;
+    let researchScenarioAttempted = false;
+    let researchScenarioPending = false;
+    function loadCalendarResearchScenarios() {
+      if (researchScenarioAttempted || researchScenarioPending) return;
+      researchScenarioPending = true;
+      fetch('/api/research-traffic-scenarios')
+        .then(response => { if (!response.ok) throw Error('Research scenarios unavailable'); return response.json(); })
+        .then(data => { if (!Array.isArray(data.scenarios)) throw Error('Invalid scenarios'); researchScenarioData=data; })
+        .catch(() => { researchScenarioData=null; })
+        .finally(() => { researchScenarioPending=false; researchScenarioAttempted=true; renderCalendar(); });
+    }
     function setCalendarView(mode) {
-      calendarViewMode = mode;
-      ['Month', 'Week', 'Day'].forEach(m => {
-        const btn = document.getElementById(`calView${m}`);
-        if (m.toLowerCase() === mode) {
-          btn.className = "px-4 py-1.5 rounded-full text-xs font-serif font-bold bg-brandPurple text-white transition-all";
-        } else {
-          btn.className = "px-4 py-1.5 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all";
-        }
+      if (!['month','week','day'].includes(mode)) return;
+      calendarViewMode=mode;
+      ['Month','Week','Day'].forEach(name=>{
+        const b=document.getElementById('calView'+name);
+        if (!b) return;
+        b.className='px-4 py-1.5 rounded-full text-xs font-serif font-bold transition-all '+
+          (name.toLowerCase()===mode?'bg-brandPurple text-white':'text-gray-600 hover:bg-gray-100');
       });
       renderCalendar();
     }
-
     function changeCalendarMonth(delta) {
-      calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+      if(calendarViewMode==='month') calendarCurrentDate=new Date(calendarCurrentDate.getFullYear(),calendarCurrentDate.getMonth()+delta,1);
+      else calendarCurrentDate=new Date(calendarCurrentDate.getFullYear(),calendarCurrentDate.getMonth(),calendarCurrentDate.getDate()+delta*(calendarViewMode==='week'?7:1));
       renderCalendar();
     }
-
     function renderCalendar() {
-      const grid = document.getElementById('calendarGrid');
-      grid.innerHTML = '';
-
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      document.getElementById('calendarMonthLabel').innerText = `${monthNames[calendarCurrentDate.getMonth()]} ${calendarCurrentDate.getFullYear()}`;
-
-      // Render Day headers
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      days.forEach(d => {
-        const header = document.createElement('div');
-        header.className = "text-center font-serif font-bold text-xs text-gray-500 py-2 border-b border-gray-100";
-        header.innerText = d;
-        grid.appendChild(header);
+      const grid=document.getElementById('calendarGrid'),label=document.getElementById('calendarMonthLabel');
+      if (!grid || !label) return;
+      loadCalendarResearchScenarios();
+      grid.replaceChildren();
+      const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const pad=n=>String(n).padStart(2,'0');
+      const dateKey=d=>[d.getFullYear(),pad(d.getMonth()+1),pad(d.getDate())].join('-');
+      const dateAdd=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+      const toWeekStart=d=>dateAdd(d,-(d.getDay()+6)%7);
+      const bank=document.getElementById('adminScenarioBank')?.value || 'first';
+      const scenario=d=>researchScenarioData?.scenarios?.find(x=>x.bank===bank&&x.weekday===days[d.getDay()]) || null;
+      const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
+      const active=a=>a.status!=='Cancelled'&&a.status!=='No Show';
+      const y=calendarCurrentDate.getFullYear(),m=calendarCurrentDate.getMonth();
+      let dates=[];
+      if(calendarViewMode==='month') dates=Array.from({length:new Date(y,m+1,0).getDate()},(_,i)=>new Date(y,m,i+1));
+      else if(calendarViewMode==='week'){const start=toWeekStart(calendarCurrentDate);dates=Array.from({length:7},(_,i)=>dateAdd(start,i));}
+      else dates=[new Date(y,m,calendarCurrentDate.getDate())];
+      label.textContent=calendarViewMode==='month'?calendarCurrentDate.toLocaleDateString('en-US',{month:'long',year:'numeric'}):calendarViewMode==='week'?dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):dates[0].toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
+      const keys=new Set(dates.map(dateKey)),periodApps=appointments.filter(a=>keys.has(a.date)&&active(a)),models=dates.map(scenario).filter(Boolean);
+      const modeledTotal=models.reduce((sum,x)=>sum+Number(x.estimated_observed_hours_total||0),0);
+      const summary=document.getElementById('adminCalendarSummary');
+      if(summary)summary.textContent='Scheduled customers: '+periodApps.length+' (non-cancelled appointments) · Experimental modeled visits: '+
+        (models.length?Math.round(modeledTotal).toLocaleString():'Unavailable')+' · '+calendarViewMode+' view. These totals are not combined.';
+      if(calendarViewMode==='month'){
+        grid.className='grid grid-cols-7 gap-2';
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(t=>grid.append(node('div','text-center font-serif font-bold text-xs text-gray-500 py-2',t)));
+        for(let i=0;i<dates[0].getDay();i++)grid.append(node('span','admin-cal-empty'));
+      }else grid.className='admin-unified-days';
+      dates.forEach(d=>{
+        const key=dateKey(d),bookings=appointments.filter(a=>a.date===key),count=bookings.filter(active).length,r=scenario(d);
+        const cell=node('div','admin-unified-cell');
+        const head=node('button','admin-unified-date',calendarViewMode==='month'?String(d.getDate()):d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
+        head.type='button';head.title='Show '+d.toDateString()+' appointment hours';
+        head.onclick=()=>{calendarCurrentDate=new Date(d);setCalendarView('day');};
+        cell.append(head,node('div','admin-unified-booked',count+' scheduled'));
+        cell.append(node('small','admin-unified-est',r?Math.round(Number(r.estimated_observed_hours_total)).toLocaleString()+' experimental visits · '+String(r.traffic_level).toUpperCase():'Traffic not modeled'));
+        if(calendarViewMode==='day'){
+          const hours=node('div','admin-unified-hours');
+          for(let h=9;h<17;h++){
+            const slotStart=pad(h)+':00',next=pad(h+1)+':00';
+            const slotApps=bookings.filter(a=>String(a.time).slice(0,2)===pad(h));
+            const forecast=r?.observed_hours?.find(item=>item.hour_start===slotStart);
+            const row=node('div','admin-unified-hour');
+            row.append(node('strong','',slotStart+'–'+next));
+            row.append(node('span','',slotApps.filter(active).length+' scheduled'));
+            row.append(node('small','',forecast?Math.round(Number(forecast.estimated_customers))+' experimental visits':'Not modeled'));
+            slotApps.forEach(a=>{const b=node('button','admin-unified-app',a.time+' · '+a.status+' · '+a.type);b.type='button';b.onclick=()=>openDetailsModal(a.id);row.append(b);});
+            hours.append(row);
+          }
+          cell.append(hours);
+        } else if(calendarViewMode==='week') {
+          bookings.slice(0,8).forEach(a=>{const b=node('button','admin-unified-app',a.time+' · '+a.status);b.type='button';b.onclick=()=>openDetailsModal(a.id);cell.append(b)});
+          if(bookings.length>8)cell.append(node('small','','+'+(bookings.length-8)+' more appointments'));
+        } else if(bookings.length) {
+          const b=node('button','admin-unified-app','View '+bookings.length+' appointment'+(bookings.length===1?'':'s'));
+          b.type='button';b.onclick=()=>{calendarCurrentDate=new Date(d);setCalendarView('day');};cell.append(b);
+        }
+        grid.append(cell);
       });
-
-      const year = calendarCurrentDate.getFullYear();
-      const month = calendarCurrentDate.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      // Empty padding cells
-      for (let i = 0; i < firstDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = "calendar-cell bg-gray-50/50 rounded-2xl border border-gray-100 p-2 opacity-50";
-        grid.appendChild(emptyCell);
-      }
-
-      // Day cells
-      for (let day = 1; day <= daysInMonth; day++) {
-        const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayApps = appointments.filter(a => a.date === cellDateStr);
-
-        const cell = document.createElement('div');
-        cell.className = "calendar-cell bg-white rounded-2xl border border-gray-200 p-2 flex flex-col justify-between hover:shadow-md transition-shadow";
-
-        let appsHtml = '';
-        dayApps.forEach(a => {
-          let badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
-          if (a.status === 'Approved') badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-          if (a.status === 'Cancelled') badgeColor = 'bg-red-100 text-red-800 border-red-300';
-
-          appsHtml += `
-            <div onclick="openDetailsModal('${a.id}')" class="cursor-pointer text-[10px] p-1 mb-1 rounded-lg border ${badgeColor} truncate font-bold hover:scale-98 transition-transform font-mono">
-              ${a.time} - Acc#${a.accountNumber.slice(-4)}
-            </div>
-          `;
-        });
-
-        cell.innerHTML = `
-          <div class="flex justify-between items-center mb-1">
-            <span class="font-serif font-bold text-xs text-gray-700">${day}</span>
-            ${dayApps.length > 0 ? `<span class="text-[9px] font-bold bg-brandPurple text-white px-1.5 py-0.5 rounded-full">${dayApps.length}</span>` : ''}
-          </div>
-          <div class="overflow-y-auto max-h-16 space-y-1 scrollbar-none">
-            ${appsHtml}
-          </div>
-        `;
-        grid.appendChild(cell);
-      }
     }

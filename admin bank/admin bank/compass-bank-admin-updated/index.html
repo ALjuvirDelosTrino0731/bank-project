@@ -22,7 +22,7 @@
 
   <!-- Application JavaScript -->
   <script src="js/app.js" defer></script>
-  <link rel="stylesheet" href="css/traffic-widget.css">
+  <link rel="stylesheet" href="css/unified-calendar.css">
 </head>
 <body>
 <!-- TOAST NOTIFICATION SYSTEM -->
@@ -395,6 +395,7 @@
               <button onclick="changeCalendarMonth(1)" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-sm text-gray-800">→</button>
             </div>
 
+            <button type="button" onclick="calendarCurrentDate=new Date();renderCalendar()" class="text-xs font-bold text-brandPurple border border-gray-200 rounded-xl px-3 py-2">Today</button>
             <!-- Legend -->
             <div class="hidden md:flex items-center space-x-4 text-xs font-medium">
               <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span>Approved</span></span>
@@ -409,14 +410,18 @@
               <!-- Rendered via JS -->
             </div>
           </div>
-          <section class="compass-traffic-widget" data-traffic-widget aria-label="Experimental customer traffic calendar">
-  <div class="ctw-heading"><div><h3>Customer Traffic Calendar</h3><p>Explore weekday-based traffic estimates from external historical banking observations.</p></div><span class="ctw-tag">Experimental estimates</span></div>
-  <div class="ctw-controls"><div class="ctw-views" role="group" aria-label="Calendar view"><button type="button" data-view="month">Month</button><button type="button" data-view="week">Week</button><button type="button" data-view="day">Day</button></div><label>Historical bank <select data-bank><option value="first">First observed bank</option><option value="second">Second observed bank</option><option value="third">Third observed bank</option></select></label></div>
-  <div class="ctw-navigation"><div><button type="button" data-nav="prev" aria-label="Previous period">&#8249;</button><button type="button" data-nav="today">Today</button><button type="button" data-nav="next" aria-label="Next period">&#8250;</button></div><strong data-period></strong></div>
-  <div class="ctw-summary"><div><small data-total-label>Estimated customer visits</small><strong data-total>—</strong></div><div><small>Data source</small><strong>Historical Nigerian bank observations</strong></div><div><small>Modeled hours</small><strong>Weekdays, 08:00–14:59</strong></div></div>
-  <div data-calendar class="ctw-calendar" aria-live="polite">Loading experimental traffic estimates…</div>
-  <p class="ctw-disclaimer">These are experimental weekday scenarios, <strong>not validated forecasts</strong> for the selected Philippine branch or calendar date. Classification provides traffic levels; regression provides hourly estimates. Week and month totals sum scenario estimates, not actual visits. The underlying research data has no verified calendar dates.</p>
-</section>
+          <div class="bg-white rounded-3xl border border-gray-200 p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div><h3 class="font-serif font-bold text-lg">Calendar totals</h3><p class="text-xs text-gray-500">Appointments and experimental model estimates are shown separately.</p></div>
+              <label class="text-xs font-semibold">Historical research bank
+                <select id="adminScenarioBank" onchange="renderCalendar()" class="bg-white border border-gray-200 rounded-lg p-2">
+                  <option value="first">First observed bank</option><option value="second">Second observed bank</option><option value="third">Third observed bank</option>
+                </select>
+              </label>
+            </div>
+            <div id="adminCalendarSummary" class="text-sm font-semibold bg-gray-50 rounded-xl p-3" aria-live="polite">Loading calendar totals…</div>
+            <p class="text-xs text-gray-500 leading-relaxed">Experimental traffic estimates are based on external Nigerian banking observations without verified historical dates. They are not validated Philippine branch forecasts. Scheduled appointments are not confirmed arrivals; unmodeled hours are labeled separately.</p>
+          </div>
         </section>
 
         <!-- ================= SECTION 4: TRAFFIC PREDICTION ANALYTICS ================= -->
@@ -585,6 +590,6 @@
   </div>
 
   
-  <script src="js/traffic-widget.js"></script>
+  
 </body>
 </html>
