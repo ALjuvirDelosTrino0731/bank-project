@@ -64,19 +64,31 @@ router.get('/appointments',auth,async(req,res)=>{
 });
 router.patch('/appointments/:id/status',auth,async(req,res)=>{
   const nextStatus=String(req.body?.status||'');
-  const allowed={pending:['confirmed','cancelled'],confirmed:['checked_in','cancelled','no_show'],checked_in:['completed'],completed:[],cancelled:[],no_show:[]};
+  const allowed={pending:['confirmed','cancelled'],confirmed:['cancelled','no_show'],checked_in:['completed'],completed:[],cancelled:[],no_show:[]};
+  // Check-ins must go through POST /visits/appointments/:reference/check-in to create a verified event atomically.
   if(!Object.hasOwn(allowed,nextStatus)) return res.status(400).json({status:'error',message:'Invalid status'});
   const connection=await db.getConnection();
   try {
     await connection.beginTransaction();
-    const [rows]=await connection.query('SELECT appointment_id,status FROM appointments WHERE reference_number=? FOR UPDATE',[req.params.id]);
+    const [rows]=await connection.query("SELECT appointment_id,status,DATE_FORMAT(appointment_date,'%Y-%m-%d') AS appointment_date,TIME_FORMAT(appointment_time,'%H:%i') AS appointment_time FROM appointments WHERE reference_number=? FOR UPDATE",[req.params.id]);
     if(!rows.length){await connection.rollback();return res.status(404).json({status:'error',message:'Appointment not found'});}
     const a=rows[0];
     if(!allowed[a.status]?.includes(nextStatus)){await connection.rollback();return res.status(409).json({status:'error',message:'Invalid status transition'});}
+    if(nextStatus==='no_show'){
+      const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+      const p=Object.fromEntries(parts.map(v=>[v.type,v.value]));
+      const now=p.year+'-'+p.month+'-'+p.day+' '+p.hour+':'+p.minute;
+      const scheduled=a.appointment_date+' '+a.appointment_time;
+      if(scheduled>now){
+        await connection.rollback();
+        return res.status(409).json({status:'error',message:'A no-show can be recorded only after the scheduled appointment time'});
+      }
+    }
     await connection.query('UPDATE appointments SET status=? WHERE appointment_id=?',[nextStatus,a.appointment_id]);
     await connection.query('INSERT INTO appointment_status_history (appointment_id,old_status,new_status,changed_by_employee_id,change_reason) VALUES (?,?,?,NULL,?)',[a.appointment_id,a.status,nextStatus,'Employee dashboard (prototype login)']);
     await connection.commit();res.json({status:'ok',reference_number:req.params.id,old_status:a.status,new_status:nextStatus});
   }catch(e){await connection.rollback();console.error('Employee status:',e.code||e.message);res.status(500).json({status:'error',message:'Unable to update appointment'});}finally{connection.release();}
 });
+router.use('/visits',auth,require('./visitRoutes'));
 router.use('/datasets',auth,require('./datasetRoutes'));
 module.exports=router;

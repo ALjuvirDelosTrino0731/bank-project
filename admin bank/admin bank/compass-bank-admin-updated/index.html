@@ -422,6 +422,33 @@
             <div id="adminCalendarSummary" class="text-sm font-semibold bg-gray-50 rounded-xl p-3" aria-live="polite">Loading calendar totals…</div>
             <p class="text-xs text-gray-500 leading-relaxed">Experimental traffic estimates are based on external Nigerian banking observations without verified historical dates. They are not validated Philippine branch forecasts. Scheduled appointments are not confirmed arrivals; unmodeled hours are labeled separately.</p>
           </div>
+          <div class="bg-white rounded-3xl border border-gray-200 p-4 sm:p-5 space-y-4" id="verifiedVisitPanel">
+            <div>
+              <h3 class="font-serif font-bold text-lg text-gray-900">Verified branch arrivals</h3>
+              <p class="text-xs text-gray-500 mt-1">Only employee-confirmed check-ins and observed walk-ins count toward real traffic. Scheduled bookings are separate.</p>
+            </div>
+            <form id="walkInForm" onsubmit="recordVerifiedWalkIns(event)" class="flex flex-wrap gap-3 items-end">
+              <label class="text-xs font-bold text-gray-700">Observed walk-in arrivals
+                <input id="verifiedWalkInCount" class="block border border-gray-200 rounded-xl px-3 py-2 mt-1 w-32" type="number" min="1" max="50" step="1" value="1" required>
+              </label>
+              <label class="text-xs text-gray-600 flex items-center gap-2">
+                <input id="verifiedWalkInConfirm" type="checkbox" required>
+                I personally verified these arrivals
+              </label>
+              <button type="submit" class="bg-brandPurple hover:opacity-90 rounded-xl text-white text-xs font-bold px-4 py-3">Record walk-ins</button>
+              <button type="button" onclick="refreshVerifiedVisits()" class="border border-gray-200 rounded-xl px-3 py-3 text-xs font-bold">Refresh totals</button>
+              <button type="button" onclick="downloadVerifiedVisitsCSV()" class="border border-gray-200 rounded-xl px-3 py-3 text-xs font-bold">Export verified hourly CSV</button>
+            </form>
+            <div id="verifiedVisitTotals" class="rounded-xl bg-gray-50 p-3 text-xs text-gray-700" aria-live="polite">Loading verified arrival totals…</div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left">
+                <thead><tr class="text-gray-500 border-b"><th class="py-2">Date</th><th>Hour</th><th>Checked in</th><th>Walk-ins</th><th>Verified total</th></tr></thead>
+                <tbody id="verifiedVisitHourlyRows"><tr><td class="py-3 text-gray-500" colspan="5">No arrival records loaded.</td></tr></tbody>
+              </table>
+            </div>
+            <div id="verifiedNoShows" class="text-xs text-gray-600" aria-live="polite"></div>
+            <p class="text-xs text-gray-500">These counts are operational observations for future research assessment. They do not automatically retrain either ML model.</p>
+          </div>
         </section>
 
         <!-- ================= SECTION 4: TRAFFIC PREDICTION ANALYTICS ================= -->
