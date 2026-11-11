@@ -1,27 +1,21 @@
-Compass Bank Admin Portal
-=========================
+Compass Bank Admin Portal — Phase 4O
+===================================
 
-Project structure:
-- index.html
-- css/styles.css
-- js/tailwind-config.js
-- js/app.js
+This employee interface is served by the Node.js backend at /employee/.
+Do not open index.html directly as the authenticated API and database are required.
 
-How to run:
-1. Keep the folder structure intact.
-2. Open index.html in a browser, or run the folder through VS Code Live Server.
-3. Internet access is required for Tailwind CSS, Chart.js, and Google Fonts CDN resources.
+Setup:
+1. Copy backend/.env.example to backend/.env locally, then fill in local credentials.
+2. From backend/, run npm install and node server.js.
+3. Browse http://localhost:3000/employee/ and authenticate using locally configured employee credentials.
 
-Updated features:
-- Transaction amount is displayed in Philippine pesos in the appointments table and details modal.
-- Check number is displayed for Deposit Check and Withdraw Check appointments.
-- Manual appointment creation accepts an amount.
-- Manual appointment creation requires a check number only for check transactions.
-- Appointment search also matches check numbers.
-- Existing appointment dashboard, status actions, and calendar functions are retained.
+Includes appointment management, dataset intelligence, a real-data evaluation UI,
+and an experimental traffic scenario explorer. Research datasets and generated
+research outputs are NOT distributed in the public source snapshot. The evaluation
+and traffic explorer may display an unavailable-data state until locally restored.
 
-Demo login credentials shown in the original page:
-- Email: admin@compassbank.com
-- Password: admin123
-
-This is a front-end demo using sample in-memory appointment data. Newly created appointments reset when the page is refreshed.
+Research integrity:
+The Nigerian observation source (Bishop et al., 2018, DOI: 10.1016/j.dib.2018.05.101)
+is not a validated predictor for a Philippine bank branch. Historical source dates
+are unavailable. No generated research results should be described as verified
+future calendar forecasts.

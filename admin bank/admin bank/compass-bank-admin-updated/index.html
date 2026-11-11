@@ -22,6 +22,7 @@
 
   <!-- Application JavaScript -->
   <script src="js/app.js" defer></script>
+  <link rel="stylesheet" href="css/traffic-widget.css">
 </head>
 <body>
 <!-- TOAST NOTIFICATION SYSTEM -->
@@ -65,13 +66,13 @@
           <form onsubmit="handleLogin(event)" class="space-y-4">
             <div>
               <label for="loginUser" class="block font-serif font-bold text-sm text-black mb-1.5">Email or Username</label>
-              <input type="text" id="loginUser" required value="admin@compassbank.com" class="pill-input w-full bg-white text-gray-900 px-5 py-3 text-sm border-none font-medium placeholder-gray-400">
+              <input type="text" id="loginUser" required value="" class="pill-input w-full bg-white text-gray-900 px-5 py-3 text-sm border-none font-medium placeholder-gray-400">
             </div>
 
             <div>
               <label for="loginPass" class="block font-serif font-bold text-sm text-black mb-1.5">Password</label>
               <div class="relative">
-                <input type="password" id="loginPass" required value="admin123" class="pill-input w-full bg-white text-gray-900 pl-5 pr-12 py-3 text-sm border-none font-medium">
+                <input type="password" id="loginPass" required value="" class="pill-input w-full bg-white text-gray-900 pl-5 pr-12 py-3 text-sm border-none font-medium">
                 <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none p-1">
                   <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -86,10 +87,6 @@
               <span>→</span>
             </button>
           </form>
-
-          <div class="bg-white/60 backdrop-blur-xs p-3 rounded-2xl border border-black/5 text-center text-xs text-gray-700">
-            <span class="font-bold">Demo Credentials:</span> admin@compassbank.com / admin123
-          </div>
         </div>
       </div>
     </div>
@@ -173,6 +170,10 @@
             <span>Calendar</span>
           </button>
 
+          <a href="dataset.html" target="_blank" rel="noopener" class="block px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100">Dataset Intelligence</a>
+          <a href="traffic-scenarios.html" target="_blank" rel="noopener" class="block px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100">Traffic Scenarios · Month / Week / Day</a>
+          <a href="evaluation.html" target="_blank" rel="noopener" class="block px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100">Real-data ML Evaluation</a>
+
           <button id="nav-traffic" onclick="switchNavTab('traffic')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
             <span>Traffic Prediction</span>
@@ -201,8 +202,8 @@
             <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow flex items-center justify-between">
               <div>
                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Today</p>
-                <h3 id="statTotal" class="font-serif font-black text-3xl text-gray-900 mt-1">12</h3>
-                <span class="inline-block mt-2 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">+18% vs yesterday</span>
+                <h3 id="statTotal" class="font-serif font-black text-3xl text-gray-900 mt-1">0</h3>
+                <span class="inline-block mt-2 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">Live counts from database</span>
               </div>
               <div class="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-800">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -213,7 +214,7 @@
             <div class="bg-white rounded-3xl p-6 border-l-4 border-l-amber-400 border-gray-200 card-shadow flex items-center justify-between">
               <div>
                 <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Pending Review</p>
-                <h3 id="statPending" class="font-serif font-black text-3xl text-amber-600 mt-1">4</h3>
+                <h3 id="statPending" class="font-serif font-black text-3xl text-amber-600 mt-1">0</h3>
                 <span class="inline-block mt-2 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full">Requires Admin Action</span>
               </div>
               <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center">
@@ -225,7 +226,7 @@
             <div class="bg-white rounded-3xl p-6 border-l-4 border-l-emerald-500 border-gray-200 card-shadow flex items-center justify-between">
               <div>
                 <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Approved Slots</p>
-                <h3 id="statApproved" class="font-serif font-black text-3xl text-emerald-600 mt-1">6</h3>
+                <h3 id="statApproved" class="font-serif font-black text-3xl text-emerald-600 mt-1">0</h3>
                 <span class="inline-block mt-2 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Confirmed visits</span>
               </div>
               <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center">
@@ -236,9 +237,9 @@
             <!-- Rejected Appointments -->
             <div class="bg-white rounded-3xl p-6 border-l-4 border-l-red-500 border-gray-200 card-shadow flex items-center justify-between">
               <div>
-                <p class="text-xs font-bold text-red-700 uppercase tracking-wider">Rejected</p>
-                <h3 id="statRejected" class="font-serif font-black text-3xl text-red-600 mt-1">2</h3>
-                <span class="inline-block mt-2 text-xs font-medium text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full">Slot conflict / issue</span>
+                <p class="text-xs font-bold text-red-700 uppercase tracking-wider">Cancelled</p>
+                <h3 id="statRejected" class="font-serif font-black text-3xl text-red-600 mt-1">0</h3>
+                <span class="inline-block mt-2 text-xs font-medium text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full">Cancelled bookings</span>
               </div>
               <div class="w-12 h-12 bg-red-100 text-red-700 rounded-2xl flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -256,17 +257,17 @@
                 <div>
                   <div class="flex items-center space-x-2">
                     <span class="text-xs font-black uppercase tracking-wider bg-black text-brandLime px-2.5 py-0.5 rounded-full">Traffic Forecast</span>
-                    <span class="text-xs font-bold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">HEAVY TRAFFIC EXPECTED</span>
+                    <span class="text-xs font-bold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">FORECAST NOT LOADED</span>
                   </div>
-                  <h3 class="font-serif font-bold text-xl text-black mt-1">Peak Volume Predicted: 10:00 AM - 2:00 PM</h3>
+                  <h3 class="font-serif font-bold text-xl text-black mt-1">Loading forecast...</h3>
                   <p class="text-xs md:text-sm text-gray-900 font-sans mt-1">
-                    Customer arrivals are expected to surge around 11:30 AM due to lunch-hour check deposits and cash withdrawals.
+                    Model demonstration trained on synthetic data; not actual bank measurements.
                   </p>
                 </div>
               </div>
               <div class="bg-white/90 p-4 rounded-2xl border border-black/10 w-full md:w-auto text-center flex-shrink-0">
                 <p class="text-xs font-bold text-gray-500 uppercase">Recommended Action</p>
-                <p class="font-serif font-bold text-base text-brandPurple">Open Tellers 4 & 5</p>
+                <p class="font-serif font-bold text-base text-brandPurple">Review staffing needs</p>
               </div>
             </div>
           </div>
@@ -276,11 +277,11 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-serif font-bold text-xl text-gray-900">Hourly Customer Traffic Prediction</h3>
-                <p class="text-xs text-gray-500">Predicted customer volume vs actual arrivals for branch hours (8:00 AM - 5:00 PM)</p>
+                <p class="text-xs text-gray-500">Synthetic-model forecast for branch hours (9:00 AM - 5:00 PM); no actual arrival data</p>
               </div>
               <div class="flex items-center space-x-4 text-xs font-semibold">
                 <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandPurple inline-block"></span><span>Predicted Traffic</span></span>
-                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandLimeDark inline-block"></span><span>Actual Visits</span></span>
+                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandLimeDark inline-block"></span><span>No actual visits available</span></span>
               </div>
             </div>
             <div class="relative h-64 md:h-72 w-full">
@@ -336,7 +337,7 @@
               <button onclick="setAppointmentFilter('All')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold transition-all bg-brandPurple text-white">All (<span id="countAll">0</span>)</button>
               <button onclick="setAppointmentFilter('Pending')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Pending (<span id="countPending">0</span>)</button>
               <button onclick="setAppointmentFilter('Approved')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Approved (<span id="countApproved">0</span>)</button>
-              <button onclick="setAppointmentFilter('Rejected')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Rejected (<span id="countRejected">0</span>)</button>
+              <button onclick="setAppointmentFilter('Cancelled')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Cancelled (<span id="countRejected">0</span>)</button>
               <button onclick="setAppointmentFilter('Completed')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Completed (<span id="countCompleted">0</span>)</button>
             </div>
 
@@ -398,7 +399,7 @@
             <div class="hidden md:flex items-center space-x-4 text-xs font-medium">
               <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span>Approved</span></span>
               <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-amber-400"></span><span>Pending</span></span>
-              <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-red-500"></span><span>Rejected</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded-full bg-red-500"></span><span>Cancelled</span></span>
             </div>
           </div>
 
@@ -408,6 +409,14 @@
               <!-- Rendered via JS -->
             </div>
           </div>
+          <section class="compass-traffic-widget" data-traffic-widget aria-label="Experimental customer traffic calendar">
+  <div class="ctw-heading"><div><h3>Customer Traffic Calendar</h3><p>Explore weekday-based traffic estimates from external historical banking observations.</p></div><span class="ctw-tag">Experimental estimates</span></div>
+  <div class="ctw-controls"><div class="ctw-views" role="group" aria-label="Calendar view"><button type="button" data-view="month">Month</button><button type="button" data-view="week">Week</button><button type="button" data-view="day">Day</button></div><label>Historical bank <select data-bank><option value="first">First observed bank</option><option value="second">Second observed bank</option><option value="third">Third observed bank</option></select></label></div>
+  <div class="ctw-navigation"><div><button type="button" data-nav="prev" aria-label="Previous period">&#8249;</button><button type="button" data-nav="today">Today</button><button type="button" data-nav="next" aria-label="Next period">&#8250;</button></div><strong data-period></strong></div>
+  <div class="ctw-summary"><div><small data-total-label>Estimated customer visits</small><strong data-total>—</strong></div><div><small>Data source</small><strong>Historical Nigerian bank observations</strong></div><div><small>Modeled hours</small><strong>Weekdays, 08:00–14:59</strong></div></div>
+  <div data-calendar class="ctw-calendar" aria-live="polite">Loading experimental traffic estimates…</div>
+  <p class="ctw-disclaimer">These are experimental weekday scenarios, <strong>not validated forecasts</strong> for the selected Philippine branch or calendar date. Classification provides traffic levels; regression provides hourly estimates. Week and month totals sum scenario estimates, not actual visits. The underlying research data has no verified calendar dates.</p>
+</section>
         </section>
 
         <!-- ================= SECTION 4: TRAFFIC PREDICTION ANALYTICS ================= -->
@@ -430,33 +439,19 @@
             <!-- Analytics Chart 2: Congestion Heat Forecast -->
             <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
               <h3 class="font-serif font-bold text-lg text-gray-900">Branch Capacity Breakdown</h3>
-              <p class="text-xs text-gray-500">Hourly counter load capacity index</p>
+              <p class="text-xs text-gray-500">Predicted visitors per hour (synthetic model, not actual counter capacity)</p>
               <div class="relative h-64">
                 <canvas id="capacityBarChart"></canvas>
               </div>
             </div>
           </div>
 
-          <!-- Capacity Recommendations Box -->
+          <!-- Model-based, explicitly illustrative staffing guidance -->
           <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
-            <h3 class="font-serif font-bold text-lg text-gray-900">Smart Staffing Recommendations</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 space-y-1">
-                <p class="text-xs font-bold text-amber-700 uppercase">10:00 AM - 12:00 PM</p>
-                <p class="font-serif font-bold text-gray-900">High Teller Demand</p>
-                <p class="text-xs text-gray-600">Deploy 2 backup tellers for check deposit verification.</p>
-              </div>
-              <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 space-y-1">
-                <p class="text-xs font-bold text-emerald-700 uppercase">1:00 PM - 3:00 PM</p>
-                <p class="font-serif font-bold text-gray-900">Optimal Express Flow</p>
-                <p class="text-xs text-gray-600">Standard counter operations expected to meet SLA.</p>
-              </div>
-              <div class="bg-purple-50 rounded-2xl p-4 border border-purple-200 space-y-1">
-                <p class="text-xs font-bold text-brandPurple uppercase">3:30 PM - 5:00 PM</p>
-                <p class="font-serif font-bold text-gray-900">Closing Cash Rush</p>
-                <p class="text-xs text-gray-600">Assign express queue manager for rapid ticket processing.</p>
-              </div>
-            </div>
+            <h3 class="font-serif font-bold text-lg text-gray-900">Staffing Planning Guidance</h3>
+            <p id="staffingGuidance" class="text-sm text-gray-600" role="status">
+              Loading today's synthetic-model forecast…
+            </p>
           </div>
         </section>
 
@@ -590,5 +585,6 @@
   </div>
 
   
+  <script src="js/traffic-widget.js"></script>
 </body>
 </html>

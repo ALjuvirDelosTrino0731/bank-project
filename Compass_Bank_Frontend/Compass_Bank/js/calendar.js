@@ -121,7 +121,18 @@
 
   /* ---------- State ---------- */
 
-  let forecastProvider = sampleForecastProvider;
+  let forecastProvider = async function (startISO, endISO) {
+    const url = `/api/traffic-forecast?start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Forecast API unavailable');
+    const payload = await response.json();
+    const result = {};
+    for (const entry of payload.forecasts || []) {
+      if (entry.level === 'closed') continue; // no traffic prediction for closed weekends
+      result[entry.date] = {expectedVisitors: entry.expectedVisitors, level: entry.level};
+    }
+    return result;
+  };
   let forecasts = {};
   let selectedISO = '';
   let viewYear = 0;

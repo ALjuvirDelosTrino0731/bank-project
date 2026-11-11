@@ -1,29 +1,54 @@
-// MOCK APPOINTMENTS INITIAL DATA STATE USING ACCOUNT NUMBERS
-    let appointments = [
-      { id: 'CP-89240', accountNumber: '1123415123', email: 'eleanor@example.com', phone: '0917 555 0192', date: '2026-11-09', time: '09:00', type: 'Deposit Cash', amount: '₱15,000.00', checkNumber: '', status: 'Approved', transactions: ['Deposit Cash: ₱15,000.00 (Acc: 1123415123)'] },
-      { id: 'CP-89241', accountNumber: '9842104921', email: 'robert.chen@gmail.com', phone: '0928 444 8821', date: '2026-11-09', time: '10:00', type: 'Deposit Check', amount: '₱45,500.00', checkNumber: '9821', status: 'Pending', transactions: ['Deposit Check: ₱45,500.00 (Acc: 9842104921) [Check #9821]'] },
-      { id: 'CP-89242', accountNumber: '5510293841', email: 'smartinez@yahoo.com', phone: '0905 111 3322', date: '2026-11-09', time: '10:00', type: 'Withdraw Cash', amount: '₱20,000.00', checkNumber: '', status: 'Pending', transactions: ['Withdraw Cash: ₱20,000.00 (Acc: 5510293841)'] },
-      { id: 'CP-89243', accountNumber: '3349102958', email: 'dkim@techcorp.io', phone: '0918 999 2211', date: '2026-11-09', time: '11:00', type: 'Deposit Cash', amount: '₱120,000.00', checkNumber: '', status: 'Approved', transactions: ['Deposit Cash: ₱120,000.00 (Acc: 3349102958)'] },
-      { id: 'CP-89244', accountNumber: '7749102934', email: 'areyes@design.ph', phone: '0917 888 7766', date: '2026-11-09', time: '13:00', type: 'Withdraw Check', amount: '₱8,500.00', checkNumber: '1102', status: 'Rejected', transactions: ['Withdraw Check: ₱8,500.00 (Acc: 7749102934) [Check #1102]'] },
-      { id: 'CP-89245', accountNumber: '2294019284', email: 'gtorres@outlook.com', phone: '0920 333 4455', date: '2026-11-09', time: '14:00', type: 'Deposit Cash', amount: '₱5,000.00', checkNumber: '', status: 'Pending', transactions: ['Deposit Cash: ₱5,000.00 (Acc: 2294019284)'] },
-      { id: 'CP-89246', accountNumber: '8839201948', email: 'clara.o@space.co.uk', phone: '0915 222 6677', date: '2026-11-09', time: '15:00', type: 'Deposit Check', amount: '₱32,000.00', checkNumber: '5524', status: 'Approved', transactions: ['Deposit Check: ₱32,000.00 (Acc: 8839201948) [Check #5524]'] },
-      { id: 'CP-89247', accountNumber: '6610293847', email: 'mbrody@museum.org', phone: '0919 777 4411', date: '2026-11-10', time: '09:00', type: 'Withdraw Cash', amount: '₱50,000.00', checkNumber: '', status: 'Approved', transactions: ['Withdraw Cash: ₱50,000.00 (Acc: 6610293847)'] },
-      { id: 'CP-89248', accountNumber: '4492019482', email: 'hannah@leaf.com', phone: '0922 888 1133', date: '2026-11-10', time: '10:00', type: 'Deposit Cash', amount: '₱12,400.00', checkNumber: '', status: 'Pending', transactions: ['Deposit Cash: ₱12,400.00 (Acc: 4492019482)'] },
-      { id: 'CP-89249', accountNumber: '1102938475', email: 'vstone@cyber.net', phone: '0908 666 5544', date: '2026-11-10', time: '11:00', type: 'Withdraw Check', amount: '₱65,000.00', checkNumber: '7719', status: 'Completed', transactions: ['Withdraw Check: ₱65,000.00 (Acc: 1102938475)'] }
-    ];
+// Live employee appointment state loaded from MySQL
+    let appointments = [];
+    let employeeToken = null;
+    const employeeApi = "/api/employee";
+
+    // Non-blocking notifications. Defined globally for login, logout, and status actions.
+    function showToast(message, type = 'info') {
+      const previous = document.getElementById('compass-toast');
+      if (previous) previous.remove();
+      const toast = document.createElement('div');
+      toast.id = 'compass-toast';
+      toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+      toast.textContent = String(message ?? '');
+      Object.assign(toast.style, {
+        position: 'fixed', bottom: '24px', right: '24px',
+        maxWidth: 'min(420px, calc(100vw - 32px))',
+        padding: '14px 20px', borderRadius: '10px',
+        backgroundColor: type === 'error' ? '#b91c1c' : type === 'success' ? '#166534' : '#374151',
+        color: '#fff', zIndex: '99999', fontFamily: 'Arial, sans-serif',
+        boxShadow: '0 4px 14px rgba(0,0,0,.22)'
+      });
+      document.body.appendChild(toast);
+      setTimeout(() => { if (toast.isConnected) toast.remove(); }, 3500);
+    }
+    function safeText(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+    async function refreshEmployeeAppointments() {
+      const response = await fetch(employeeApi + "/appointments", {headers:{Authorization:"Bearer " + employeeToken}});
+      if (!response.ok) throw new Error("Unable to load appointments ("+response.status+")");
+      const data = await response.json();
+      appointments = data.appointments.map(a => ({...a, status: ({confirmed:"Approved",pending:"Pending",cancelled:"Cancelled",checked_in:"Checked In",completed:"Completed",no_show:"No Show"})[a.status] || a.status, id:safeText(a.id),email:safeText(a.email),phone:safeText(a.phone),date:safeText(a.date),time:safeText(a.time),type:safeText(a.type),accountNumber:"Masked",amount:a.amount == null ? null : Number(a.amount),transactions:a.transactions.map(safeText)}));
+      updateStatCounters();renderQuickListTable();renderAppointmentsTable();renderCalendar();renderAnalyticsCharts();
+    }
 
     let currentFilter = 'All';
     let currentActiveModalAppId = null;
-    let calendarCurrentDate = new Date(2026, 10, 1); // Nov 2026
+    let calendarCurrentDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     let calendarViewMode = 'month';
 
     // Charts references
     let trafficChartRef = null;
+    let forecastByDate = new Map();
     let transactionPieChartRef = null;
     let capacityBarChartRef = null;
 
     // Format transaction amounts as Philippine pesos.
-    function formatPeso(amount) {
+    function localDateString(date) {
+  return [date.getFullYear(), String(date.getMonth()+1).padStart(2,"0"), String(date.getDate()).padStart(2,"0")].join("-");
+}
+
+function formatPeso(amount) {
+  if (amount === null || amount === undefined || amount === "") return "Not provided";
       const numericAmount = Number(String(amount ?? '').replace(/[^0-9.-]/g, ''));
       return new Intl.NumberFormat('en-PH', {
         style: 'currency',
@@ -47,6 +72,100 @@
         checkInput.value = '';
       }
     }
+
+    // Model forecasts are demonstrations based on synthetic historical visits.
+    async function loadEmployeeForecast() {
+      const now = new Date();
+      const start = [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+      const until = new Date(now.getFullYear(),now.getMonth(),now.getDate()+30);
+      const end = [until.getFullYear(),String(until.getMonth()+1).padStart(2,'0'),String(until.getDate()).padStart(2,'0')].join('-');
+      const response = await fetch(`/api/traffic-forecast?start=${start}&end=${end}`);
+      if (!response.ok) throw new Error('Forecast service unavailable');
+      const data = await response.json();
+      forecastByDate = new Map((data.forecasts || []).map(f => [f.date,f]));
+      const chosen = forecastByDate.get(start) || (data.forecasts || []).find(f => f.level !== 'closed');
+      renderEmployeeForecast(chosen);
+      renderAnalyticsCharts();
+    }
+    function renderEmployeeForecast(f) {
+      const banner = document.querySelector('#section-dashboard .bg-brandLime.rounded-3xl');
+      if (banner) {
+        const tags = banner.querySelectorAll('span');
+        const levelTag = [...tags].find(el => el.textContent.includes('FORECAST NOT LOADED') || el.textContent.includes('TRAFFIC EXPECTED') || el.textContent.includes('TRAFFIC') && el.classList.contains('bg-amber-500'));
+        if (levelTag) levelTag.textContent = f ? (f.level === 'closed' ? 'BRANCH CLOSED' : f.level.toUpperCase() + ' TRAFFIC') : 'NO FORECAST AVAILABLE';
+        const headline = banner.querySelector('h3');
+        if (headline) headline.textContent = f ? `${f.date}: ${f.level === 'closed' ? 'Branch closed' : f.expectedVisitors + ' expected visitors'}` : 'No model forecast for selected date';
+        const explanation = banner.querySelector('p.text-xs');
+        if (explanation) explanation.textContent = 'Synthetic-data Random Forest prediction; not measured branch traffic.';
+      }
+      const chartEl = document.getElementById('trafficPredictionChart');
+      if (!chartEl || typeof Chart === 'undefined') return;
+      if (trafficChartRef) trafficChartRef.destroy();
+      const hours = f?.hours || [];
+      trafficChartRef = new Chart(chartEl, {type:'bar',data:{labels:hours.map(h=>`${h.hour}:00`),datasets:[{label:'Predicted visits (synthetic model)',data:hours.map(h=>h.predicted_visits),backgroundColor:'#8050b0'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+    }
+
+    // Live analytics: service mix from MySQL appointments; hourly demand from the
+    // synthetic-data model. Neither chart represents measured branch arrivals.
+    function renderAnalyticsCharts() {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js unavailable: check internet/CDN access.');
+        return;
+      }
+      const pieEl = document.getElementById('transactionPieChart');
+      if (pieEl) {
+        if (transactionPieChartRef) transactionPieChartRef.destroy();
+        const counts = new Map();
+        appointments.filter(a => !['Cancelled','No Show'].includes(a.status)).forEach(a => {
+          const items = Array.isArray(a.transactions) && a.transactions.length ? a.transactions : [a.type];
+          items.forEach(t => {
+            const label = String(t).split(':')[0].trim() || 'Unspecified';
+            counts.set(label, (counts.get(label) || 0) + 1);
+          });
+        });
+        const labels = [...counts.keys()];
+        transactionPieChartRef = new Chart(pieEl, {
+          type:'doughnut',
+          data:{labels:labels.length ? labels : ['No upcoming appointments'],
+            datasets:[{data:labels.length ? [...counts.values()] : [1],
+              backgroundColor:labels.length ? ['#8050b0','#b9cf21','#f59e0b','#10b981','#64748b'] : ['#e5e7eb']}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},
+            tooltip:{enabled:labels.length>0}}}
+        });
+      }
+      const barEl = document.getElementById('capacityBarChart');
+      if (barEl) {
+        if (capacityBarChartRef) capacityBarChartRef.destroy();
+        const today = localDateString(new Date());
+        const f = forecastByDate.get(today);
+        const hours = f?.hours || [];
+        capacityBarChartRef = new Chart(barEl, {
+          type:'bar',
+          data:{labels:hours.length ? hours.map(h => `${h.hour}:00`) : ['No forecast'],
+            datasets:[{label:'Predicted visitors/hour (synthetic model)',
+              data:hours.length ? hours.map(h => h.predicted_visits) : [0],backgroundColor:'#8050b0'}]},
+          options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}},
+            plugins:{legend:{display:true}}}
+        });
+      }
+      renderStaffingGuidance();
+    }
+    function renderStaffingGuidance() {
+      const box = document.getElementById('staffingGuidance');
+      if (!box) return;
+      const f = forecastByDate.get(localDateString(new Date()));
+      const hours = f?.hours || [];
+      if (!hours.length) {
+        box.textContent = 'No operating-hour forecast for today. No staffing estimate is available.';
+        return;
+      }
+      const peak = [...hours].sort((a,b) => b.predicted_visits-a.predicted_visits)[0];
+      box.textContent = `Illustrative planning guidance only: model peak is ${peak.hour}:00–${peak.hour+1}:00 ` +
+        `(${peak.predicted_visits} predicted visits). A manager should review staffing; ` +
+        `the model does not know actual teller availability or service times.`;
+    }
+    function initCharts() { renderAnalyticsCharts(); }
+
 
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
@@ -77,16 +196,44 @@
       passInput.type = passInput.type === 'password' ? 'text' : 'password';
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('dashboardView').classList.remove('hidden');
-      showToast('Welcome back, Admin User!', 'success');
-      // Trigger Chart resize render
-      setTimeout(() => { if (trafficChartRef) trafficChartRef.resize(); }, 200);
+      const passwordInput = document.getElementById('loginPass');
+      try {
+        const response = await fetch(employeeApi + '/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: document.getElementById('loginUser').value.trim(),
+            password: passwordInput.value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.token) throw new Error(result.message || 'Login failed');
+        employeeToken = result.token;
+        passwordInput.value = '';
+        await refreshEmployeeAppointments();
+        document.getElementById('loginView').classList.add('hidden');
+        document.getElementById('dashboardView').classList.remove('hidden');
+        showToast('Employee appointments loaded from MySQL', 'success');
+        // Forecast failure must not log out an otherwise authenticated employee.
+        try {
+          await loadEmployeeForecast();
+          setTimeout(() => { if (trafficChartRef) trafficChartRef.resize(); }, 200);
+        } catch (forecastError) {
+          console.error('Forecast loading failed:', forecastError);
+          showToast('Logged in, but traffic forecast could not be loaded.', 'error');
+        }
+      } catch (error) {
+        employeeToken = null;
+        showToast(error.message || 'Unable to log in', 'error');
+        console.error('Employee login failed:', error);
+      }
     }
 
-    function handleLogout() {
+    async function handleLogout() {
+      if (employeeToken) {try {await fetch(employeeApi+'/logout',{method:'POST',headers:{Authorization:'Bearer '+employeeToken}});}catch(_) {}}
+      employeeToken = null;appointments = [];forecastByDate.clear();
       document.getElementById('dashboardView').classList.add('hidden');
       document.getElementById('loginView').classList.remove('hidden');
       showToast('Logged out of Admin Portal.', 'info');
@@ -106,6 +253,8 @@
           btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150";
         }
       });
+      if (tabId === 'traffic') setTimeout(renderAnalyticsCharts, 0);
+      if (tabId === 'dashboard' && trafficChartRef) setTimeout(() => trafficChartRef.resize(), 0);
       // Close mobile sidebar if open
       document.getElementById('sidebar').classList.add('hidden');
       document.getElementById('sidebar').classList.add('lg:flex');
@@ -118,10 +267,11 @@
 
     // UPDATE SUMMARY CARDS & COUNTERS
     function updateStatCounters() {
-      const total = appointments.length;
+      const today = localDateString(new Date());
+      const total = appointments.filter(a => a.date === today).length;
       const pending = appointments.filter(a => a.status === 'Pending').length;
       const approved = appointments.filter(a => a.status === 'Approved').length;
-      const rejected = appointments.filter(a => a.status === 'Rejected').length;
+      const rejected = appointments.filter(a => a.status === 'Cancelled').length;
       const completed = appointments.filter(a => a.status === 'Completed').length;
 
       document.getElementById('statTotal').innerText = total;
@@ -129,7 +279,7 @@
       document.getElementById('statApproved').innerText = approved;
       document.getElementById('statRejected').innerText = rejected;
 
-      document.getElementById('countAll').innerText = total;
+      document.getElementById('countAll').innerText = appointments.length;
       document.getElementById('countPending').innerText = pending;
       document.getElementById('countApproved').innerText = approved;
       document.getElementById('countRejected').innerText = rejected;
@@ -141,7 +291,7 @@
       const tbody = document.getElementById('quickListTable');
       tbody.innerHTML = '';
       
-      const todayApps = appointments.slice(0, 5); // Take top 5
+      const todayApps = appointments.filter(a => a.date === localDateString(new Date())).slice(0, 5);
       todayApps.forEach(app => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-gray-50/80 transition-colors";
@@ -262,47 +412,26 @@ function renderAppointmentsTable() {
         return `<span class="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span><span>Approved</span></span>`;
       } else if (status === 'Pending') {
         return `<span class="inline-flex items-center space-x-1 bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span><span>Pending</span></span>`;
-      } else if (status === 'Rejected') {
-        return `<span class="inline-flex items-center space-x-1 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span><span>Rejected</span></span>`;
+      } else if (status === 'Cancelled') {
+        return `<span class="inline-flex items-center space-x-1 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span><span>Cancelled</span></span>`;
       } else {
         return `<span class="inline-flex items-center space-x-1 bg-slate-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span><span>Completed</span></span>`;
       }
     }
 
     // CONFLICT PREVENTION GUARDRAIL FOR APPROVALS
-    function attemptApprove(appId) {
-      const target = appointments.find(a => a.id === appId);
-      if (!target) return;
-
-      // Check if another APPROVED appointment exists at exact same date & time slot
-      const conflict = appointments.find(a => 
-        a.id !== appId && 
-        a.date === target.date && 
-        a.time === target.time && 
-        a.status === 'Approved'
-      );
-
-      if (conflict) {
-        document.getElementById('conflictMessageText').innerText = 
-          `Conflict Detected! Account #${conflict.accountNumber} (${conflict.id}) is already APPROVED for ${target.date} at ${target.time}. Multiple approvals for this single counter slot are blocked.`;
-        document.getElementById('conflictModal').classList.remove('hidden');
-        document.getElementById('conflictModal').classList.add('flex');
-        return;
-      }
-
-      changeStatus(appId, 'Approved');
-    }
-
-    function changeStatus(appId, newStatus) {
-      const target = appointments.find(a => a.id === appId);
-      if (target) {
-        target.status = newStatus;
-        updateStatCounters();
-        renderQuickListTable();
-        renderAppointmentsTable();
-        renderCalendar();
-        showToast(`Appointment ${appId} marked as ${newStatus}.`, 'success');
-      }
+    function attemptApprove(appId) { changeStatus(appId, 'Approved'); }
+    async function changeStatus(appId, newStatus) {
+      const map = {Approved:'confirmed',Cancelled:'cancelled',Completed:'completed','Checked In':'checked_in','No Show':'no_show'};
+      if (!map[newStatus]) {showToast('Unsupported status','error');return;}
+      try {
+        const response = await fetch(employeeApi+'/appointments/'+encodeURIComponent(appId)+'/status',{method:'PATCH',headers:{Authorization:'Bearer '+employeeToken,'Content-Type':'application/json'},body:JSON.stringify({status:map[newStatus]})});
+        const data = await response.json();
+        if(!response.ok) throw new Error(data.message||'Update failed');
+        await refreshEmployeeAppointments();
+        await loadEmployeeForecast();
+        showToast('Appointment status saved to MySQL','success');
+      }catch(e){showToast(e.message,'error');}
     }
 
     // MODAL HANDLERS
@@ -343,14 +472,14 @@ function renderAppointmentsTable() {
       if (app.status === 'Pending') {
         actionContainer.innerHTML = `
           <button onclick="updateAppointmentStatusFromModal('Approved')" class="${buttonBase} bg-emerald-600 hover:bg-emerald-700">Approve</button>
-          <button onclick="updateAppointmentStatusFromModal('Rejected')" class="${buttonBase} bg-red-600 hover:bg-red-700">Reject</button>
+          <button onclick="updateAppointmentStatusFromModal('Cancelled')" class="${buttonBase} bg-red-600 hover:bg-red-700">Cancel</button>
         `;
       } else if (app.status === 'Approved') {
         actionContainer.innerHTML = `
           <button onclick="updateAppointmentStatusFromModal('Pending')" class="${buttonBase} bg-amber-500 hover:bg-amber-600">↩ Undo</button>
           <button onclick="updateAppointmentStatusFromModal('Completed')" class="${buttonBase} bg-slate-700 hover:bg-slate-800">Complete</button>
         `;
-      } else if (app.status === 'Rejected') {
+      } else if (app.status === 'Cancelled') {
         actionContainer.innerHTML = `
           <button onclick="updateAppointmentStatusFromModal('Pending')" class="${buttonBase} bg-amber-500 hover:bg-amber-600">↩ Undo</button>
         `;
@@ -383,6 +512,9 @@ function renderAppointmentsTable() {
     }
 
     function handleCreateManualAppointment(e) {
+      e.preventDefault();
+      showToast('Manual appointment creation is disabled until backend validation is connected. Use the customer booking page.','error');
+      return;
       e.preventDefault();
       const accNum = document.getElementById('newCustAccNum').value.trim();
       const transactionType = document.getElementById('newCustType').value;
@@ -494,7 +626,7 @@ function renderAppointmentsTable() {
         dayApps.forEach(a => {
           let badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
           if (a.status === 'Approved') badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-          if (a.status === 'Rejected') badgeColor = 'bg-red-100 text-red-800 border-red-300';
+          if (a.status === 'Cancelled') badgeColor = 'bg-red-100 text-red-800 border-red-300';
 
           appsHtml += `
             <div onclick="openDetailsModal('${a.id}')" class="cursor-pointer text-[10px] p-1 mb-1 rounded-lg border ${badgeColor} truncate font-bold hover:scale-98 transition-transform font-mono">
