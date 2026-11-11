@@ -78,5 +78,6 @@ router.patch('/appointments/:id/status',auth,async(req,res)=>{
     await connection.commit();res.json({status:'ok',reference_number:req.params.id,old_status:a.status,new_status:nextStatus});
   }catch(e){await connection.rollback();console.error('Employee status:',e.code||e.message);res.status(500).json({status:'error',message:'Unable to update appointment'});}finally{connection.release();}
 });
+router.use('/visits',auth,require('./visitRoutes'));
 router.use('/datasets',auth,require('./datasetRoutes'));
 module.exports=router;
