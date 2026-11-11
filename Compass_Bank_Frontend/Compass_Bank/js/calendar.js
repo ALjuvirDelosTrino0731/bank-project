@@ -26,7 +26,7 @@
   const period=ds=>ds.length===1?ds[0].toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}):ds[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+ds[ds.length-1].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const getDates=()=>{if(view==='day')return [focus];if(view==='week')return Array.from({length:7},(_,i)=>add(mon(focus),i));const y=focus.getFullYear(),m=focus.getMonth(),last=new Date(y,m+1,0).getDate();return Array.from({length:last},(_,i)=>new Date(y,m,i+1))};
   function choose(d) {
-    focus=d;selected=bookable(d)?iso(d):null;dateField.value=selected||'';
+    focus=d;selected=bookable(d)?iso(d):null;dateField.value=selected||'';timeField.value='';
     dateField.dispatchEvent(new Event('change',{bubbles:true}));
     if(view!=='day')view='day';
     render();
