@@ -437,6 +437,7 @@
               </label>
               <button type="submit" class="bg-brandPurple hover:opacity-90 rounded-xl text-white text-xs font-bold px-4 py-3">Record walk-ins</button>
               <button type="button" onclick="refreshVerifiedVisits()" class="border border-gray-200 rounded-xl px-3 py-3 text-xs font-bold">Refresh totals</button>
+              <button type="button" onclick="downloadVerifiedVisitsCSV()" class="border border-gray-200 rounded-xl px-3 py-3 text-xs font-bold">Export verified hourly CSV</button>
             </form>
             <div id="verifiedVisitTotals" class="rounded-xl bg-gray-50 p-3 text-xs text-gray-700" aria-live="polite">Loading verified arrival totals…</div>
             <div class="overflow-x-auto">
