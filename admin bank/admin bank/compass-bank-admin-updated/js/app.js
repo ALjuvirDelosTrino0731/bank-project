@@ -29,6 +29,7 @@
       const data = await response.json();
       appointments = data.appointments.map(a => ({...a, status: ({confirmed:"Approved",pending:"Pending",cancelled:"Cancelled",checked_in:"Checked In",completed:"Completed",no_show:"No Show"})[a.status] || a.status, id:safeText(a.id),email:safeText(a.email),phone:safeText(a.phone),date:safeText(a.date),time:safeText(a.time),type:safeText(a.type),accountNumber:"Masked",amount:a.amount == null ? null : Number(a.amount),transactions:a.transactions.map(safeText)}));
       updateStatCounters();renderQuickListTable();renderAppointmentsTable();renderCalendar();renderAnalyticsCharts();
+      if (document.getElementById('verifiedVisitHourlyRows')) refreshVerifiedVisits();
     }
 
     let currentFilter = 'All';
@@ -412,6 +413,10 @@ function renderAppointmentsTable() {
         return `<span class="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span><span>Approved</span></span>`;
       } else if (status === 'Pending') {
         return `<span class="inline-flex items-center space-x-1 bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span><span>Pending</span></span>`;
+      } else if (status === 'Checked In') {
+        return `<span class="inline-flex bg-violet-100 text-violet-800 text-xs font-bold px-2.5 py-1 rounded-full">Checked In</span>`;
+      } else if (status === 'No Show') {
+        return `<span class="inline-flex bg-rose-100 text-rose-800 text-xs font-bold px-2.5 py-1 rounded-full">No Show</span>`;
       } else if (status === 'Cancelled') {
         return `<span class="inline-flex items-center space-x-1 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span><span>Cancelled</span></span>`;
       } else {
@@ -476,8 +481,13 @@ function renderAppointmentsTable() {
         `;
       } else if (app.status === 'Approved') {
         actionContainer.innerHTML = `
-          <button onclick="updateAppointmentStatusFromModal('Pending')" class="${buttonBase} bg-amber-500 hover:bg-amber-600">↩ Undo</button>
-          <button onclick="updateAppointmentStatusFromModal('Completed')" class="${buttonBase} bg-slate-700 hover:bg-slate-800">Complete</button>
+          <button onclick="updateAppointmentStatusFromModal('Checked In')" class="${buttonBase} bg-emerald-600 hover:bg-emerald-700">Record check-in</button>
+          <button onclick="updateAppointmentStatusFromModal('No Show')" class="${buttonBase} bg-rose-700 hover:bg-rose-800">Mark no-show</button>
+          <button onclick="updateAppointmentStatusFromModal('Cancelled')" class="${buttonBase} bg-red-600 hover:bg-red-700">Cancel</button>
+        `;
+      } else if (app.status === 'Checked In') {
+        actionContainer.innerHTML = `
+          <button onclick="updateAppointmentStatusFromModal('Completed')" class="${buttonBase} bg-slate-700 hover:bg-slate-800">Complete service</button>
         `;
       } else if (app.status === 'Cancelled') {
         actionContainer.innerHTML = `
@@ -493,14 +503,81 @@ function renderAppointmentsTable() {
       document.getElementById('detailsModal').classList.add('flex');
     }
 
+    async function recordAppointmentCheckIn(appId) {
+      if (!window.confirm('Confirm this customer is physically present at the branch? This records one real arrival and cannot be undone.')) return;
+      try {
+        const response=await fetch(employeeApi+'/visits/appointments/'+encodeURIComponent(appId)+'/check-in',{
+          method:'POST',headers:{Authorization:'Bearer '+employeeToken,'Content-Type':'application/json'}
+        });
+        const data=await response.json();
+        if (!response.ok) throw new Error(data.message||'Unable to record check-in');
+        await refreshEmployeeAppointments();
+        showToast('Verified arrival recorded: '+data.recorded_visit_date+' at '+String(data.recorded_hour).padStart(2,'0')+':00','success');
+        closeModal('detailsModal');
+      } catch(e){showToast(e.message,'error');}
+    }
     function updateAppointmentStatusFromModal(newStatus) {
       if (!currentActiveModalAppId) return;
-      if (newStatus === 'Approved') {
-        attemptApprove(currentActiveModalAppId);
-      } else {
-        changeStatus(currentActiveModalAppId, newStatus);
-      }
+      if (newStatus === 'Checked In') {recordAppointmentCheckIn(currentActiveModalAppId);return;}
+      if (newStatus === 'No Show' && !window.confirm('Confirm the customer did not arrive? This marks a no-show, not a verified visit.')) return;
+      if (newStatus === 'Approved') attemptApprove(currentActiveModalAppId);
+      else changeStatus(currentActiveModalAppId,newStatus);
       closeModal('detailsModal');
+    }
+    async function recordVerifiedWalkIns(event) {
+      event.preventDefault();
+      const form=document.getElementById('walkInForm');
+      if(!form.reportValidity())return;
+      const count=Number(document.getElementById('verifiedWalkInCount').value);
+      if(!Number.isInteger(count)||count<1||count>50){showToast('Enter 1–50 observed walk-ins','error');return;}
+      if(!window.confirm('Record '+count+' actual walk-in arrivals at the current Philippine branch time?'))return;
+      const button=form.querySelector('button[type="submit"]');button.disabled=true;
+      try {
+        const response=await fetch(employeeApi+'/visits/walk-ins',{
+          method:'POST',headers:{Authorization:'Bearer '+employeeToken,'Content-Type':'application/json'},
+          body:JSON.stringify({count,confirmed:document.getElementById('verifiedWalkInConfirm').checked})
+        });
+        const data=await response.json();
+        if(!response.ok)throw new Error(data.message||'Unable to record arrivals');
+        document.getElementById('verifiedWalkInConfirm').checked=false;
+        document.getElementById('verifiedWalkInCount').value='1';
+        showToast(count+' walk-in arrivals recorded','success');
+        await refreshVerifiedVisits();
+      } catch(e){showToast(e.message,'error');}finally{button.disabled=false;}
+    }
+    async function refreshVerifiedVisits(){
+      const table=document.getElementById('verifiedVisitHourlyRows');
+      const summary=document.getElementById('verifiedVisitTotals');
+      if(!table||!summary||!employeeToken)return;
+      const d=new Date(),start=new Date(d.getFullYear(),d.getMonth(),1);
+      const pad=n=>String(n).padStart(2,'0');
+      const fmt=x=>[x.getFullYear(),pad(x.getMonth()+1),pad(x.getDate())].join('-');
+      const from=fmt(start),to=fmt(d);
+      try{
+        const headers={Authorization:'Bearer '+employeeToken};
+        const [a,b]=await Promise.all([
+          fetch(employeeApi+'/visits/hourly?from='+from+'&to='+to,{headers}),
+          fetch(employeeApi+'/visits/no-shows?from='+from+'&to='+to,{headers})
+        ]);
+        const data=await a.json(),noShows=await b.json();
+        if(!a.ok||!b.ok)throw new Error(data.message||noShows.message||'Unable to load verified visits');
+        table.replaceChildren();
+        if(!data.rows.length){
+          const tr=document.createElement('tr'),td=document.createElement('td');
+          td.colSpan=5;td.className='py-3 text-gray-500';td.textContent='No verified arrivals recorded this month.';tr.append(td);table.append(tr);
+        }
+        let verified=0,checked=0,walk=0;
+        data.rows.forEach(r=>{
+          verified+=r.verified_total;checked+=r.checked_in;walk+=r.walk_ins;
+          const tr=document.createElement('tr');tr.className='border-b border-gray-100';
+          [r.date,String(r.hour_start).padStart(2,'0')+':00',r.checked_in,r.walk_ins,r.verified_total].forEach(v=>{
+            const td=document.createElement('td');td.className='py-2 pr-3';td.textContent=v;tr.append(td);
+          });table.append(tr);
+        });
+        summary.textContent='Month to date · '+verified+' verified arrivals ('+checked+' checked-in appointments + '+walk+' walk-ins). These are separate from scheduled customer totals and experimental ML estimates.';
+        const noShowCount=noShows.rows.reduce((sum,r)=>sum+r.no_show_count,0);
+        document.getElementById('verifiedNoShows').textContent=noShowCount+' reported no-shows for scheduled dates this month. No-shows are excluded from verified arrivals.';
+      }catch(e){summary.textContent='Verified visit records unavailable: '+e.message;table.replaceChildren();}
     }
 
     function openNewAppointmentModal() {
