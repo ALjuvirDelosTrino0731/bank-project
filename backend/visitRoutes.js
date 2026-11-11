@@ -26,16 +26,21 @@ function validRange(from,to){
 router.post('/appointments/:reference/check-in',async(req,res)=>{
   const ref=String(req.params.reference||'').trim();
   if(!ref||ref.length>128)return res.status(400).json({status:'error',message:'Invalid appointment reference'});
-  const conn=await db.getConnection();
+  let conn;
   try{
+    conn=await db.getConnection();
     await conn.beginTransaction();
-    const [rows]=await conn.query('SELECT appointment_id,status FROM appointments WHERE reference_number=? FOR UPDATE',[ref]);
+    const [rows]=await conn.query("SELECT appointment_id,status,DATE_FORMAT(appointment_date,'%Y-%m-%d') AS appointment_date FROM appointments WHERE reference_number=? FOR UPDATE",[ref]);
     if(!rows.length){await conn.rollback();return res.status(404).json({status:'error',message:'Appointment not found'});}
     if(rows[0].status!=='confirmed'){
       await conn.rollback();
       return res.status(409).json({status:'error',message:'Only approved appointments can be checked in. Already checked-in and cancelled bookings cannot be counted twice.'});
     }
     const now=manilaNow();
+    if(rows[0].appointment_date!==now.date){
+      await conn.rollback();
+      return res.status(409).json({status:'error',message:'Check-in is permitted only on the scheduled local branch date'});
+    }
     await conn.query(
       'INSERT INTO verified_visit_events (event_type,appointment_reference,visit_count,visit_date,visit_hour) VALUES (?,?,?,?,?)',
       ['appointment_checkin',ref,1,now.date,now.hour]
@@ -46,10 +51,10 @@ router.post('/appointments/:reference/check-in',async(req,res)=>{
     await conn.commit();
     res.status(201).json({status:'ok',reference_number:ref,appointment_status:'checked_in',recorded_visit_date:now.date,recorded_hour:now.hour,recorded_visits:1});
   }catch(e){
-    try{await conn.rollback();}catch(_){}
+    if(conn){try{await conn.rollback();}catch(_){}}
     if(e.code==='ER_DUP_ENTRY')return res.status(409).json({status:'error',message:'This appointment already has a recorded arrival'});
     fail(res,e,'appointment check-in');
-  }finally{conn.release();}
+  }finally{if(conn)conn.release();}
 });
 router.post('/walk-ins',async(req,res)=>{
   const count=req.body?.count;
@@ -80,6 +85,24 @@ router.get('/hourly',async(req,res)=>{
     res.set('Cache-Control','no-store');
     res.json({status:'ok',source:'employee-verified arrivals only; bookings are not counted',timezone:'Asia/Manila',from,to,rows:output});
   }catch(e){fail(res,e,'hourly data');}
+});
+router.get('/hourly.csv',async(req,res)=>{
+  const today=manilaNow().date,from=String(req.query.from||today),to=String(req.query.to||today);
+  if(!validRange(from,to))return res.status(400).json({status:'error',message:'Use valid from/to dates (YYYY-MM-DD) within 366 days'});
+  try{
+    const [rows]=await db.query(
+      'SELECT DATE_FORMAT(visit_date,"%Y-%m-%d") AS date,visit_hour AS hour_start,'+
+      'SUM(CASE WHEN event_type="appointment_checkin" THEN visit_count ELSE 0 END) AS checked_in,'+
+      'SUM(CASE WHEN event_type="walk_in" THEN visit_count ELSE 0 END) AS walk_ins,'+
+      'SUM(visit_count) AS verified_total FROM verified_visit_events '+
+      'WHERE visit_date BETWEEN ? AND ? GROUP BY visit_date,visit_hour ORDER BY visit_date,visit_hour',
+      [from,to]
+    );
+    const records=rows.map(r=>[r.date,Number(r.hour_start),Number(r.checked_in),Number(r.walk_ins),Number(r.verified_total)].join(','));
+    const output=['date,hour_start,checked_in,walk_ins,verified_total',...records].join('\r\n')+'\r\n';
+    res.set({'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="compass_verified_hourly_visits.csv"','Cache-Control':'no-store'});
+    res.send(output);
+  }catch(e){fail(res,e,'CSV export');}
 });
 router.get('/no-shows',async(req,res)=>{
   const today=manilaNow().date,from=String(req.query.from||today),to=String(req.query.to||today);
