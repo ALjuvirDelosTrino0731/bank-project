@@ -6,6 +6,9 @@ const QRCode = require('qrcode');
 const db = require('./db');
 
 function configured() {
+  if (process.env.COMPASS_EMAIL_PROVIDER === 'resend') {
+    return require('./compass-email-delivery.cjs').isReady();
+  }
   return ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM']
     .every(key => Boolean(process.env[key]?.trim()));
 }
@@ -22,7 +25,7 @@ function escapeHtml(value) {
 
 async function sendApprovedAppointment(reference) {
   if (!configured()) {
-    console.log('Approval email skipped: SMTP not configured');
+    console.log('Approval email skipped: email delivery not configured');
     return 'not_configured';
   }
 
@@ -47,7 +50,9 @@ async function sendApprovedAppointment(reference) {
     const port = Number(process.env.SMTP_PORT || 587);
     const secure = port === 465;
 
-    const transporter = nodemailer.createTransport({
+    const transporter = process.env.COMPASS_EMAIL_PROVIDER === 'resend'
+      ? require('./compass-email-delivery.cjs')
+      : nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port,
       secure,
@@ -106,7 +111,7 @@ async function sendApprovedAppointment(reference) {
       }]
     });
 
-    console.log('Approval email accepted by SMTP provider');
+    console.log('Approval email accepted by email provider');
     return 'sent';
 
   } catch (error) {

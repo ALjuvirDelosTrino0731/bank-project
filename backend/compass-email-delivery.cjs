@@ -19,7 +19,20 @@ async function sendMail(message) {
       to: Array.isArray(message.to) ? message.to : [message.to],
       subject: message.subject,
       text: message.text,
-      html: message.html
+      html: message.html,
+      attachments: Array.isArray(message.attachments)
+        ? message.attachments.map(item => {
+            if (!Buffer.isBuffer(item.content)) {
+              throw new Error('Resend attachment must contain a Buffer');
+            }
+            return {
+              filename: item.filename,
+              content: item.content.toString('base64'),
+              content_type: item.contentType || 'application/octet-stream',
+              content_id: item.cid
+            };
+          })
+        : undefined
     }),
     signal: AbortSignal.timeout(10000)
   });
