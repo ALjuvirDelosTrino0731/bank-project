@@ -1,0 +1,16 @@
+bank_id,week,day_position,daily_arrivals,actual_class,predicted_class
+1,4,1,857,Moderate,High
+1,4,2,981,High,Low
+1,4,3,1057,High,High
+1,4,4,899,Moderate,High
+1,4,5,996,High,Low
+2,4,1,1017,High,High
+2,4,2,1009,High,Low
+2,4,3,891,Moderate,Moderate
+2,4,4,948,High,Moderate
+2,4,5,901,Moderate,Moderate
+3,4,1,988,High,High
+3,4,2,784,Low,Moderate
+3,4,3,648,Low,Moderate
+3,4,4,891,Moderate,Moderate
+3,4,5,752,Low,Low

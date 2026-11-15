@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Compass Bank | Research Traffic Demonstration</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f5fa;color:#192842;font:15px/1.5 system-ui,'Segoe UI',Arial}header{background:linear-gradient(120deg,#16376b,#2b568d);color:white;padding:26px max(20px,calc((100% - 1030px)/2))}h1{font-size:clamp(23px,4vw,32px);margin:0 0 5px}header p{margin:0;color:#dce8f7}nav{margin-top:14px;display:flex;gap:18px;flex-wrap:wrap}nav a{color:white;text-decoration:underline}main{max-width:1030px;margin:26px auto;padding:0 18px 38px}.notice{background:#fff9ed;border-left:5px solid #d18d29;padding:15px 18px;border-radius:6px;margin-bottom:18px}.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:18px}.panel{background:white;border:1px solid #dfe5ed;box-shadow:0 2px 10px #1928420a;border-radius:13px;padding:21px;margin-bottom:18px}h2{font-size:19px;margin:0 0 8px}h3{font-size:16px}p{margin:6px 0 14px}.muted{font-size:13px;color:#66718a}.inputrow{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.inputrow label,form label{display:block;font-size:13px;font-weight:600;margin:8px 0}.inputrow input,form select{display:block;width:100%;border:1px solid #bbc5d4;border-radius:7px;padding:9px;margin-top:4px;background:white;font:inherit}.date{max-width:200px}.slot{max-width:105px}.button{border:0;border-radius:9px;padding:11px 17px;background:#173f7c;color:white;font:600 14px system-ui;cursor:pointer;margin-top:9px}.button:disabled{opacity:.6;cursor:wait}.result{margin-top:14px;border:1px dashed #a4b6d0;background:#f7f9ff;padding:14px;border-radius:9px;min-height:60px;white-space:pre-wrap}.pill{display:inline-block;padding:2px 10px;background:#e7effd;border-radius:30px;font-size:13px}.chart{width:100%;border:1px solid #e4e9f0;border-radius:7px;margin:9px 0}.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin:15px 0}.score{padding:12px;background:#f4f7fd;border-radius:8px}.score strong{font-size:19px;display:block}.score span{font-size:12px;color:#556}.foot{font-size:12px;color:#5b6577}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f0be53;outline-offset:2px}
+</style>
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head>
+<body data-role="employee"><header><h1>Compass Bank — ML Research Demonstration</h1><p>Integrated classification, regression, and ISO-oriented system evaluation</p><nav><a href="/customer/">Customer scheduling</a><a href="/employee/">Employee dashboard</a><a href="/employee/regression-validation.html">SOP 3 detailed validation</a></nav></header>
+<main>
+<div class="notice"><strong>Research prototype — not a live bank traffic service.</strong> The models use simulated 2026 records based on an external teller-queue source. No real Philippine-branch traffic accuracy has been established. Time slots are numbered because their original clock times are unverified.</div>
+<div class="cols">
+<section class="panel"><h2>SOP 2 — Daily traffic classification</h2><p class="muted">Predict Low / Moderate / High using only the weekday and month. This calendar-only forecast has weak simulated test accuracy (24.24%).</p><div class="inputrow"><label class="date">Choose a business date<input id="date" type="date" value="2026-11-16"></label></div><button id="runForecast" class="button" type="button">Run research forecast</button><div id="forecastResult" class="result" role="status" aria-live="polite">Choose a date to run the trained classifier and regressor.</div></section>
+<section class="panel"><h2>SOP 2 — Early-day traffic nowcast</h2><p class="muted">More useful once counts for the first 3 slots are already known. Exploratory simulation test accuracy: 72.73%. Cannot forecast before those counts exist.</p><div class="inputrow"><label class="slot">Slot 1 count<input type="number" id="s1" min="0" max="10000" value="40"></label><label class="slot">Slot 2 count<input type="number" id="s2" min="0" max="10000" value="38"></label><label class="slot">Slot 3 count<input type="number" id="s3" min="0" max="10000" value="42"></label></div><button id="runNowcast" class="button" type="button">Predict from slot counts</button><div id="nowcastResult" class="result" role="status" aria-live="polite">Enter three observed or demonstration counts.</div></section>
+</div>
+<section class="panel"><h2>SOP 3 — Hourly-slot regression and model evaluation</h2><p class="muted">The regressor estimates counts for slots 1–8. Slot clock times are unverified; do not interpret them as verified hourly branch visits. These graphs use the separate simulated October–December holdout.</p><div class="scores" id="metrics"><div class="score">Loading model evaluation...</div></div><div class="cols"><div><h3>Predicted vs. simulated actual</h3><img id="trendImage" class="chart" alt="Graph comparing predicted and simulated actual slot counts"></div><div><h3>Residual distribution</h3><img id="residualImage" class="chart" alt="Graph showing simulated actual minus predicted residuals"></div></div><div><h3>Classification confusion matrix</h3><img id="confusionImage" class="chart" style="max-width:500px" alt="Low moderate high classification confusion matrix"></div></section>
+<section class="panel"><h2>SOP 5 — Anonymous system evaluation</h2><p>After actually trying the scheduling or management system, rate each criterion from 1 (poor) to 5 (excellent). Submissions are stored anonymously. No results are fabricated.</p><form id="survey"><div class="cols"><label>Functionality<select name="functionality" required><option value="">Choose</option><option value="1">1 - Poor</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 - Excellent</option></select></label><label>Usability<select name="usability" required><option value="">Choose</option><option value="1">1 - Poor</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 - Excellent</option></select></label><label>Reliability<select name="reliability" required><option value="">Choose</option><option value="1">1 - Poor</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 - Excellent</option></select></label><label>Suitability<select name="suitability" required><option value="">Choose</option><option value="1">1 - Poor</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 - Excellent</option></select></label></div><button type="submit" class="button">Submit anonymous evaluation</button><div id="surveyStatus" role="status" class="muted"></div></form><h3>Recorded evaluation summary</h3><div id="surveySummary" class="muted">Loading...</div></section>
+<p class="foot">SOP 1 scheduling and advance transaction details remain in the Customer portal. SOP 4 appointments and employee administration remain in the Employee dashboard. Those operational flows need separate functional testing; this page does not claim they pass.</p>
+</main>
+<script>
+(()=>{'use strict';
+const el=id=>document.getElementById(id);const role=document.body.dataset.role;
+const text=(id,str)=>{el(id).textContent=str;};
+async function request(url,opt){const r=await fetch(url,opt);let data;try{data=await r.json();}catch{throw Error('Invalid server response');}if(!r.ok||data.status!=='ok')throw Error(data.message||'Request failed');return data;}
+const pct=x=>(x*100).toFixed(2)+'%';
+function forecastMsg(d){return 'Daily class: '+d.traffic_category+'\nClass probabilities: '+Object.entries(d.class_probabilities).map(([k,v])=>k+' '+pct(v)).join(', ')+'\n\nPredicted slot counts (1 to 8): '+d.estimated_slots.map(s=>s.slot+': '+s.estimated_count).join(' | ')+'\nSum of predicted slots: '+d.estimated_slot_count_total+'\n\n'+d.warning;}
+function nowcastMsg(d){return 'Early-day class: '+d.traffic_category+'\nClass probabilities: '+Object.entries(d.class_probabilities).map(([k,v])=>k+' '+pct(v)).join(', ')+'\n\n'+d.warning;}
+async function handle(btnId,outId,url,mapper){const btn=el(btnId);btn.disabled=true;text(outId,'Running trained Random Forest...');try{const d=await request(url);text(outId,mapper(d));}catch(e){text(outId,'Error: '+e.message);}finally{btn.disabled=false;}}
+el('runForecast').addEventListener('click',()=>handle('runForecast','forecastResult','/api/research-demo/forecast?'+new URLSearchParams({date:el('date').value}),forecastMsg));
+el('runNowcast').addEventListener('click',()=>handle('runNowcast','nowcastResult','/api/research-demo/nowcast?'+new URLSearchParams({date:el('date').value,slot1:el('s1').value,slot2:el('s2').value,slot3:el('s3').value}),nowcastMsg));
+const item=(name,v)=>'<div class="score"><strong>'+String(v)+'</strong><span>'+name+'</span></div>';
+async function loadEval(){try{const d=await request('/api/research-demo/evaluation');const m=d.metrics;
+ el('metrics').innerHTML=item('Pre-visit classification accuracy',pct(m.classification_previsit_accuracy))+item('Early-day nowcast accuracy (exploratory)',pct(m.classification_early_day_nowcast_accuracy))+item('Median absolute regression residual',m.regression_median_absolute_residual.toFixed(2))+item('Regression baseline residual',m.regression_slot_median_baseline_median_absolute_residual.toFixed(2));
+ el('trendImage').src=d.plots.trend;el('residualImage').src=d.plots.residuals;el('confusionImage').src=d.plots.confusion;
+ }catch(e){text('metrics','Evaluation unavailable: '+e.message);}}
+async function loadSurvey(){try{const d=await request('/api/research-demo/survey-summary');const s=d.summary;
+ text('surveySummary',s.total===0?'No participant ratings recorded yet.':s.total+' real response(s). Customers: '+s.by_role.customer+', employees: '+s.by_role.employee+'. Means: '+Object.entries(s.mean_scores).map(([k,v])=>k+' '+v+'/5').join(', '));
+ }catch(e){text('surveySummary','Evaluation totals unavailable: '+e.message);}}
+el('survey').addEventListener('submit',async event=>{event.preventDefault();const btn=event.target.querySelector('button[type=submit]');btn.disabled=true;const b={role};for(const k of ['functionality','usability','reliability','suitability'])b[k]=Number(event.target.elements[k].value);
+ try{const d=await request('/api/research-demo/survey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});text('surveyStatus',d.message);event.target.reset();await loadSurvey();}catch(e){text('surveyStatus','Could not record: '+e.message);}finally{btn.disabled=false;}});
+loadEval();loadSurvey();
+})();
+</script>
+
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body></html>

@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compass Bank | Experimental ML Scenarios</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;font:14px/1.6 Inter,Segoe UI,Arial;color:#17253b}main{max-width:1240px;margin:auto;padding:12px 16px}h1,h2{font-family:Georgia,serif;margin:0 0 7px}p{margin:6px 0 13px;color:#48566b}.card{background:white;border:1px solid #e0e6ed;border-radius:19px;padding:22px;margin:16px 0}.warn{background:#fff5db;border-left:4px solid #cc8c20;padding:14px;border-radius:9px}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:end}.controls label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700}.controls input{border:1px solid #bfc8d4;border-radius:9px;padding:11px 12px;color:#182438;min-width:140px}.controls input[type=number]{min-width:75px;width:95px}button{border:0;border-radius:10px;background:#7950ad;color:white;font-weight:750;padding:12px 15px;cursor:pointer}button:disabled{opacity:.5}.chart{display:grid;gap:8px}.bar{display:grid;grid-template-columns:62px minmax(0,1fr) 62px;align-items:center;gap:10px}.track{height:20px;background:#e9e1f1;border-radius:9px;overflow:hidden}.fill{height:100%;background:#7650a7}.value{font-variant-numeric:tabular-nums}.result{font-size:23px;color:#4c297a;font-weight:850}.explain{background:#f1f5f9;border-radius:12px;padding:15px;margin-top:14px}.two{display:grid;grid-template-columns:1fr 1.3fr;gap:15px}a{color:#604093} @media(max-width:720px){.two{grid-template-columns:1fr}}
+</style>
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head><body><main><h1>Experimental Machine Learning Scenarios</h1><p>Use these controls to run the current 2026 simulated classifiers and regression model. The figures are model outputs, not verified Philippine bank traffic.</p><div class="warn">Research only: the daily classifier has 24.24% simulated holdout accuracy. The eight regression slots have no confirmed clock times. A higher early-day score requires already-observed counts.</div>
+<section class="card"><h2>1. Predict a selected date</h2><p>Pick a Monday–Friday date in 2026 or 2027. The classifier estimates Low / Moderate / High; the regressor estimates eight slot counts. No bookings are modified.</p><div class="controls"><label>Research date<input id="date" type="date" min="2026-01-01" max="2027-12-31" value="2026-11-19"></label><button id="predict" type="button">Run classification and regression</button><button id="reset" type="button">Restore example date</button></div><p id="status" role="status">Select a date and click Run.</p><div class="two"><div><h2>Daily classification</h2><div id="category" class="result">—</div><div id="prob">—</div><p class="explain" id="classExplain">Low, Moderate or High is a research category, not a waiting-time guarantee.</p></div><div><h2>Regression: numbered slots</h2><div class="result" id="total">—</div><div class="chart" id="bars"></div><p class="explain" id="regExplain">Longer bars mean a higher estimated count relative to the other numbered slots. They are not probabilities.</p></div></div></section>
+<section class="card"><h2>2. Optional early-day classification</h2><p>Enter three slot counts that would already have been observed. This cannot be used as a pre-visit prediction. Use example counts only for demonstration.</p><div class="controls"><label>Slot 1 observed<input type="number" id="slot1" value="40" min="0" max="10000"></label><label>Slot 2 observed<input type="number" id="slot2" value="38" min="0" max="10000"></label><label>Slot 3 observed<input type="number" id="slot3" value="42" min="0" max="10000"></label><button id="nowcast" type="button">Run early-day classifier</button></div><p id="nowcastResult" role="status">Early-day simulated holdout accuracy: 72.73% (exploratory).</p></section>
+<section class="card"><h2>3. Other research views</h2><p>See model evaluation and plots for classification and regression. The earlier Nigerian-source scenario tool remains available separately for historical research comparison.</p><div class="controls"><button id="evaluation" type="button">Open model evaluation</button><button id="archive" type="button">Open historical scenarios</button></div></section>
+</main><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);const make=(t,v)=>{const e=document.createElement(t);e.textContent=v;return e;};function validDate(v){if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const d=new Date(v+'T00:00:00Z');return Number.isFinite(+d)&&d.toISOString().slice(0,10)===v&&d.getUTCDay()>0&&d.getUTCDay()<6;}
+async function api(endpoint,params){const r=await fetch('/api/research-demo/'+endpoint+'?'+new URLSearchParams(params),{cache:'no-store'});const d=await r.json();if(!r.ok||d.status!=='ok')throw Error(d.message||'Research prediction unavailable');return d;}
+function insight(category){return {Low:'The model expects a relatively lower simulated daily traffic level.',Moderate:'The model expects a middle simulated daily traffic level.',High:'The model expects a relatively higher simulated daily traffic level.'}[category]||'The model did not return a usable category.';}
+let req=0;
+async function forecast(){const id=++req;const btn=$('predict'),date=$('date').value;$('status').textContent='Checking the model...';if(!validDate(date)){$('status').textContent='Choose a valid weekday between 2026 and 2027.';return;}btn.disabled=true;try{const d=await api('forecast',{date});if(id!==req)return;const cat=d.traffic_category;$('category').textContent=cat||'Unknown';const p=Number(d.class_probabilities?.[cat]);$('prob').textContent=Number.isFinite(p)?'Model category probability: '+(p*100).toFixed(1)+'%':'Probability unavailable';$('classExplain').textContent=insight(cat)+' The simulated holdout classifier was correct on 24.24% of test days, so this prediction is uncertain.';const slots=d.estimated_slots;if(!Array.isArray(slots)||slots.length!==8)throw Error('Model did not return eight slots');const values=slots.map(s=>Number(s.estimated_count));if(values.some(x=>!Number.isFinite(x)||x<0))throw Error('Invalid numerical output');const max=Math.max(1,...values);$('total').textContent='Estimated slot sum: '+values.reduce((a,b)=>a+b,0).toFixed(1);$('bars').replaceChildren();slots.forEach((s,i)=>{const row=make('div','');row.className='bar';row.append(make('span','Slot '+s.slot));const track=make('div','');track.className='track';const fill=make('div','');fill.className='fill';fill.style.width=(100*values[i]/max).toFixed(1)+'%';track.append(fill);row.append(track,make('span',values[i].toFixed(1)));$('bars').append(row);});const highest=Math.max(...values),lowest=Math.min(...values);$('regExplain').textContent=`For ${date}, estimated slot counts range from ${lowest.toFixed(1)} to ${highest.toFixed(1)}. These are counts across numbered slots with unverified clock times, not measured arrivals or probabilities.`;$('status').textContent='Both models responded. This is a simulated research scenario.';}catch(e){$('status').textContent='Prediction failed: '+e.message;$('category').textContent='—';$('total').textContent='—';$('bars').replaceChildren();}finally{if(id===req)btn.disabled=false;}}
+$('predict').onclick=forecast;$('reset').onclick=()=>{$('date').value='2026-11-19';$('slot1').value=40;$('slot2').value=38;$('slot3').value=42;forecast();};
+$('nowcast').onclick=async()=>{const b=$('nowcast');const params={date:$('date').value};for(const n of [1,2,3]){const value=$('slot'+n).value;if(!/^\d{1,5}$/.test(value)||+value>10000){$('nowcastResult').textContent='Enter three counts between 0 and 10,000.';return;}params['slot'+n]=value;}if(!validDate(params.date)){$('nowcastResult').textContent='First choose a valid Monday–Friday date.';return;}b.disabled=true;$('nowcastResult').textContent='Running early-day model...';try{const d=await api('nowcast',params);const p=Number(d.class_probabilities?.[d.traffic_category]);$('nowcastResult').textContent='Early-day category: '+d.traffic_category+(Number.isFinite(p)?' ('+(100*p).toFixed(1)+'% model category probability).':'.')+' These inputs represent three already-observed slots, not advance knowledge.';}catch(e){$('nowcastResult').textContent='Early-day model unavailable: '+e.message;}finally{b.disabled=false;}};
+$('evaluation').onclick=()=>{if(window.parent!==window && typeof window.parent.openResearchModule==='function')window.parent.openResearchModule('evaluation');else location.href='evaluation-combined-v4.html';};
+$('archive').onclick=()=>location.href='traffic-scenarios-reconciled.html';
+forecast();
+})();
+</script>
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body></html>

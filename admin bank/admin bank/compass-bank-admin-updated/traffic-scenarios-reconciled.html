@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compass Bank | Archived Nigerian Bank Scenarios</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #f4f6f4;
+  color: #173025;
+  font: 15px/1.6 Segoe UI, Arial, sans-serif;
+}
+main { max-width: 1000px; margin: auto; padding: 28px 18px; }
+h1, h2 { margin-top: 0; }
+.card {
+  background: white;
+  border: 1px solid #dfe7df;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 16px 0;
+}
+.warning {
+  background: #fff4df;
+  border-left: 4px solid #b47b24;
+  padding: 16px;
+  border-radius: 8px;
+}
+.controls { display: flex; gap: 16px; flex-wrap: wrap; }
+.controls label { flex: 1; min-width: 180px; }
+select {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #cbd5cc;
+  border-radius: 8px;
+  font: inherit;
+}
+.metrics { display: flex; gap: 12px; flex-wrap: wrap; }
+.metric {
+  background: #f2f6f2;
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 180px;
+  flex: 1;
+}
+.metric strong { display: block; font-size: 24px; }
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #e4e8e4;
+}
+a { color: #245b83; }
+</style>
+
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head>
+<body>
+<main>
+
+<h1>Archived Nigerian Bank Traffic Scenarios</h1>
+<p>Separate historical Nigerian bank experiment (four observation weeks). Not the main 2026 simulated model documented in Chapter 4.</p>
+
+<div class="warning">
+<strong>Research demonstration only.</strong>
+These models were trained on four weeks of Nigerian bank-arrival
+observations. Observation Day 1 does not establish Monday.
+These estimates are not validated forecasts for Philippine bank
+branches or future calendar dates.
+</div>
+
+<section class="card">
+<h2>Select an observation scenario</h2>
+<div class="controls">
+<label>Bank
+<select id="bank">
+<option value="1">Bank 1</option>
+<option value="2">Bank 2</option>
+<option value="3">Bank 3</option>
+</select>
+</label>
+<label>Observation-day position
+<select id="day">
+<option value="1">Day 1</option>
+<option value="2">Day 2</option>
+<option value="3">Day 3</option>
+<option value="4">Day 4</option>
+<option value="5">Day 5</option>
+</select>
+</label>
+</div>
+</section>
+
+<section class="card">
+<h2>Random Forest predictions</h2>
+<p id="status">Loading model scenarios...</p>
+<div class="metrics">
+<div class="metric">Daily traffic class
+<strong id="classification">?</strong></div>
+<div class="metric">Estimated arrivals, observed hours only
+<strong id="total">?</strong></div>
+</div>
+<p>The classification and regression models are independent.
+The predicted traffic category may differ from a category
+calculated using the sum of hourly predictions.</p>
+<h2>Hourly regression estimates</h2>
+<table>
+<thead><tr><th>Observed hour</th><th>Estimated arrivals</th></tr></thead>
+<tbody id="hours"></tbody>
+</table>
+</section>
+<section class="card">
+<h2>Limitations</h2>
+<p>The source does not establish verified historical calendar
+dates or weekdays. Only hours 08:00?14:59 are modeled.
+The model does not account for ten-year trends, Philippine
+holidays, or actual future branch traffic.</p>
+</section>
+
+<section class="card" id="arrivalReadiness">
+  <h2>Philippine Arrival Dataset Readiness</h2>
+  <p id="readinessStatus" role="status">
+    Checking actual recorded arrival coverage...
+  </p>
+  <div class="metrics">
+    <div class="metric">Recorded hourly rows
+      <strong id="readinessRows">?</strong>
+    </div>
+    <div class="metric">Dates containing arrival records
+      <strong id="readinessDays">?</strong>
+    </div>
+    <div class="metric">Total recorded arrivals
+      <strong id="readinessArrivals">?</strong>
+    </div>
+  </div>
+  <p id="readinessPeriod"></p>
+  <p id="readinessExplanation"></p>
+  <p>
+    Employee-recorded events are not automatically independently
+    verified bank observations. Missing hours are not confirmed zeros.
+    These records do not automatically authorize model retraining
+    or Philippine future-date forecasting.
+  </p>
+  <button type="button" id="refreshReadiness">
+    Refresh arrival data
+  </button>
+</section>
+
+</main>
+
+<script>
+(async function () {
+  const bank = document.getElementById('bank');
+  const day = document.getElementById('day');
+  const status = document.getElementById('status');
+  const cls = document.getElementById('classification');
+  const total = document.getElementById('total');
+  const tbody = document.getElementById('hours');
+
+  let requestNumber = 0;
+
+  async function render() {
+    const current = ++requestNumber;
+    const bankId = Number(bank.value);
+    const dayPosition = Number(day.value);
+
+    status.textContent = 'Running Random Forest models...';
+    cls.textContent = '?';
+    total.textContent = '?';
+    tbody.replaceChildren();
+
+    try {
+      if (window.parent === window ||
+          typeof window.parent.compassResearchPredict !== 'function') {
+        throw new Error(
+          'Open this research module through the employee dashboard'
+        );
+      }
+
+      const item = await window.parent.compassResearchPredict(
+        bankId, dayPosition
+      );
+
+      // Ignore older requests if the employee changed the selection.
+      if (current !== requestNumber) return;
+
+      if (item.bank_id !== bankId ||
+          item.day_position !== dayPosition ||
+          !Array.isArray(item.observed_hours) ||
+          item.observed_hours.length !== 7) {
+        throw new Error('Unexpected experimental model response');
+      }
+
+      status.textContent =
+        'Live model inference: Bank ' + item.bank_id +
+        ', observation Day ' + item.day_position +
+        ' (experimental only)';
+
+      cls.textContent = item.traffic_level;
+      total.textContent =
+        Number(item.estimated_observed_hours_total).toFixed(1);
+
+      for (const hour of item.observed_hours) {
+        const row = document.createElement('tr');
+        const time = document.createElement('td');
+        const count = document.createElement('td');
+
+        time.textContent = hour.hour_start;
+        count.textContent =
+          Number(hour.estimated_customers).toFixed(1);
+
+        row.append(time, count);
+        tbody.append(row);
+      }
+    } catch (error) {
+      if (current !== requestNumber) return;
+
+      status.textContent = 'Prediction unavailable: ' + error.message;
+      cls.textContent = '?';
+      total.textContent = '?';
+      tbody.replaceChildren();
+    }
+  }
+
+  bank.addEventListener('change', render);
+  day.addEventListener('change', render);
+  render();
+})();
+</script>
+<script>
+
+(function () {
+  const status = document.getElementById('readinessStatus');
+  const rowCount = document.getElementById('readinessRows');
+  const dayCount = document.getElementById('readinessDays');
+  const arrivalCount = document.getElementById('readinessArrivals');
+  const period = document.getElementById('readinessPeriod');
+  const explanation = document.getElementById('readinessExplanation');
+  const button = document.getElementById('refreshReadiness');
+
+  function branchDate() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Manila',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date());
+
+    const p = Object.fromEntries(
+      parts.map(item => [item.type, item.value])
+    );
+
+    return p.year + '-' + p.month + '-' + p.day;
+  }
+
+  async function refresh() {
+    button.disabled = true;
+    status.textContent = 'Checking recorded arrivals...';
+    explanation.textContent = '';
+
+    const today = branchDate();
+    const first = today.slice(0, 8) + '01';
+
+    try {
+      if (window.parent === window ||
+          typeof window.parent.compassResearchArrivalSummary !== 'function') {
+        throw new Error('Open through the employee dashboard');
+      }
+
+      const data = await window.parent.compassResearchArrivalSummary(
+        first, today
+      );
+
+      const rows = data.rows;
+
+      if (!rows.every(row =>
+          /^\d{4}-\d{2}-\d{2}$/.test(row.date) &&
+          Number.isInteger(row.hour_start) &&
+          row.hour_start >= 0 && row.hour_start <= 23 &&
+          Number.isSafeInteger(row.verified_total) &&
+          Number.isSafeInteger(row.checked_in) &&
+          Number.isSafeInteger(row.walk_ins) &&
+          row.checked_in >= 0 &&
+          row.walk_ins >= 0 &&
+          row.verified_total === row.checked_in + row.walk_ins
+      )) {
+        throw new Error('Invalid arrival record structure');
+      }
+
+      const uniqueDates = new Set(rows.map(row => row.date));
+      const arrivals = rows.reduce(
+        (sum, row) => sum + row.verified_total, 0
+      );
+
+      rowCount.textContent = String(rows.length);
+      dayCount.textContent = String(uniqueDates.size);
+      arrivalCount.textContent = String(arrivals);
+      period.textContent = 'Period: ' + first + ' to ' + today +
+        ' (Asia/Manila)';
+
+      status.textContent =
+        'Not ready for Philippine model training or forecasting';
+
+      explanation.textContent =
+        'Recorded events cover ' + uniqueDates.size +
+        ' date(s) and ' + rows.length +
+        ' hourly row(s). This report does not establish complete ' +
+        'operating-hour coverage, whether records came from actual ' +
+        'bank activity rather than testing, or enough historical ' +
+        'observations for reliable model evaluation.';
+
+    } catch (error) {
+      rowCount.textContent = '?';
+      dayCount.textContent = '?';
+      arrivalCount.textContent = '?';
+      status.textContent = 'Data readiness could not be assessed';
+      explanation.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  button.addEventListener('click', refresh);
+  refresh();
+})();
+
+</script>
+
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body>
+</html>

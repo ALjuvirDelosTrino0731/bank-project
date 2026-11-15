@@ -1,0 +1,568 @@
+{
+  "status": "experimental_scenarios_only",
+  "source": "User-supplied mmc2(1).zip: 12 Nigerian banking observation workbooks; Bishop et al. (2018), DOI: 10.1016/j.dib.2018.05.101",
+  "training_weeks": [
+    1,
+    2,
+    3
+  ],
+  "held_out_week": 4,
+  "training_bank_days": 45,
+  "observed_hours": "08:00\u201314:59 only",
+  "classification_model": "RandomForestClassifier",
+  "regression_model": "RandomForestRegressor",
+  "daily_level_cutoffs_training_only": {
+    "low_max": 798.0,
+    "moderate_max": 932.0
+  },
+  "limitations": [
+    "Not validated for the Philippine branch",
+    "No verified calendar dates: weekday selection is scenario-only",
+    "The source mixes Excel clock fractions and H.MM decimal-encoded minutes; formats were parsed by explicit rule",
+    "No holiday, payday or month features",
+    "No estimates for 15:00\u201317:00",
+    "Do not use for staffing or queue guarantees"
+  ],
+  "scenarios": [
+    {
+      "bank": "first",
+      "weekday": "Monday",
+      "traffic_level": "high",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 170.1
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 152.5
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 133.8
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 123.6
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 114.4
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 121.3
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 129.0
+        }
+      ],
+      "estimated_observed_hours_total": 944.7
+    },
+    {
+      "bank": "first",
+      "weekday": "Tuesday",
+      "traffic_level": "low",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 172.0
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 158.8
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 112.0
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 95.5
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 93.0
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 104.5
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 121.6
+        }
+      ],
+      "estimated_observed_hours_total": 857.4
+    },
+    {
+      "bank": "first",
+      "weekday": "Wednesday",
+      "traffic_level": "high",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 181.1
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 171.8
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 105.4
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 87.5
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 85.6
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 89.6
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 121.4
+        }
+      ],
+      "estimated_observed_hours_total": 842.4
+    },
+    {
+      "bank": "first",
+      "weekday": "Thursday",
+      "traffic_level": "high",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 186.9
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 157.1
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 139.5
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 142.3
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 143.7
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 120.3
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 106.1
+        }
+      ],
+      "estimated_observed_hours_total": 995.9
+    },
+    {
+      "bank": "first",
+      "weekday": "Friday",
+      "traffic_level": "low",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 180.3
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 145.1
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 86.5
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 83.0
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 80.4
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 80.3
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 108.7
+        }
+      ],
+      "estimated_observed_hours_total": 764.3
+    },
+    {
+      "bank": "second",
+      "weekday": "Monday",
+      "traffic_level": "high",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 187.5
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 152.4
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 109.5
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 103.4
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 102.9
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 107.6
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 135.3
+        }
+      ],
+      "estimated_observed_hours_total": 898.6
+    },
+    {
+      "bank": "second",
+      "weekday": "Tuesday",
+      "traffic_level": "low",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 202.2
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 139.9
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 91.4
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 86.2
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 87.4
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 86.4
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 129.1
+        }
+      ],
+      "estimated_observed_hours_total": 822.6
+    },
+    {
+      "bank": "second",
+      "weekday": "Wednesday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 209.3
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 130.3
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 95.1
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 96.0
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 105.9
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 93.5
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 132.0
+        }
+      ],
+      "estimated_observed_hours_total": 862.1
+    },
+    {
+      "bank": "second",
+      "weekday": "Thursday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 210.3
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 142.5
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 93.8
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 89.6
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 95.8
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 86.4
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 122.6
+        }
+      ],
+      "estimated_observed_hours_total": 841.0
+    },
+    {
+      "bank": "second",
+      "weekday": "Friday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 189.1
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 127.9
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 84.9
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 89.9
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 96.8
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 91.5
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 123.8
+        }
+      ],
+      "estimated_observed_hours_total": 803.9
+    },
+    {
+      "bank": "third",
+      "weekday": "Monday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 204.6
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 153.7
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 85.8
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 83.5
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 87.4
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 86.7
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 167.3
+        }
+      ],
+      "estimated_observed_hours_total": 869.0
+    },
+    {
+      "bank": "third",
+      "weekday": "Tuesday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 208.3
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 145.6
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 100.3
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 97.9
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 107.4
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 100.1
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 167.1
+        }
+      ],
+      "estimated_observed_hours_total": 926.7
+    },
+    {
+      "bank": "third",
+      "weekday": "Wednesday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 212.2
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 139.2
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 101.2
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 95.4
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 108.4
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 98.2
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 153.7
+        }
+      ],
+      "estimated_observed_hours_total": 908.3
+    },
+    {
+      "bank": "third",
+      "weekday": "Thursday",
+      "traffic_level": "moderate",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 225.7
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 146.0
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 91.9
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 83.5
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 95.1
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 86.3
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 136.3
+        }
+      ],
+      "estimated_observed_hours_total": 864.8
+    },
+    {
+      "bank": "third",
+      "weekday": "Friday",
+      "traffic_level": "low",
+      "observed_hours": [
+        {
+          "hour_start": "08:00",
+          "estimated_customers": 203.4
+        },
+        {
+          "hour_start": "09:00",
+          "estimated_customers": 128.7
+        },
+        {
+          "hour_start": "10:00",
+          "estimated_customers": 78.8
+        },
+        {
+          "hour_start": "11:00",
+          "estimated_customers": 80.8
+        },
+        {
+          "hour_start": "12:00",
+          "estimated_customers": 88.9
+        },
+        {
+          "hour_start": "13:00",
+          "estimated_customers": 82.9
+        },
+        {
+          "hour_start": "14:00",
+          "estimated_customers": 138.1
+        }
+      ],
+      "estimated_observed_hours_total": 801.6
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "status": "experimental_four_week_bank_arrival_models",
+  "hourly_rows": 419,
+  "daily_train": 45,
+  "daily_test": 15,
+  "hourly_train": 314,
+  "hourly_test": 105,
+  "classification_accuracy": 0.4666666666666667,
+  "classification_baseline_accuracy": 0.3333333333333333,
+  "classification_balanced_accuracy": 0.45396825396825397,
+  "classification_confusion_matrix": [
+    [
+      1,
+      2,
+      0
+    ],
+    [
+      0,
+      3,
+      2
+    ],
+    [
+      3,
+      1,
+      3
+    ]
+  ],
+  "regression_median_absolute_residual": 25.223422873422834,
+  "regression_baseline_median_absolute_residual": 26.0,
+  "regression_mean_residual": 6.0129386990017295,
+  "limitation": "Four weeks only. Not validated for long-term or Philippine branch forecasting."
+}

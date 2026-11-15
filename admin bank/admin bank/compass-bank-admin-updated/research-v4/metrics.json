@@ -1,0 +1,62 @@
+{
+  "source_kind": "SIMULATED 2026 records from four weeks of BCA 2016 teller-queue observations",
+  "observed_2026_records": 0,
+  "slot_clock_times_verified": false,
+  "training_period": "2026-01-01 to 2026-09-30",
+  "test_period": "2026-10-01 to 2026-12-31",
+  "training_days": 195,
+  "test_days": 66,
+  "thresholds": {
+    "low_max": 299.0,
+    "moderate_max": 328.0
+  },
+  "classification_previsit_accuracy": 0.24242424242424243,
+  "classification_previsit_balanced_accuracy": 0.3038461538461538,
+  "classification_previsit_confusion_matrix": [
+    [
+      8,
+      4,
+      3
+    ],
+    [
+      4,
+      3,
+      5
+    ],
+    [
+      14,
+      20,
+      5
+    ]
+  ],
+  "classification_previsit_majority_baseline_accuracy": 0.22727272727272727,
+  "classification_early_day_nowcast_accuracy": 0.7272727272727273,
+  "classification_early_day_balanced_accuracy": 0.6376068376068376,
+  "classification_early_day_confusion_matrix": [
+    [
+      11,
+      3,
+      1
+    ],
+    [
+      7,
+      4,
+      1
+    ],
+    [
+      1,
+      5,
+      33
+    ]
+  ],
+  "regression_median_absolute_residual": 5.649622522823165,
+  "regression_slot_median_baseline_median_absolute_residual": 6.0,
+  "regression_mean_signed_residual": 1.8120471690217688,
+  "limitations": [
+    "Simulated holdout cannot establish real-bank prediction accuracy",
+    "2016 teller queue counts do not prove unique branch arrivals",
+    "Eight slot clock times are not verified; do not label slots 9 AM to 5 PM",
+    "Early-day nowcast requires three already-observed slot counts",
+    "Multiple modeling choices were considered on the holdout period; scores are exploratory"
+  ]
+}

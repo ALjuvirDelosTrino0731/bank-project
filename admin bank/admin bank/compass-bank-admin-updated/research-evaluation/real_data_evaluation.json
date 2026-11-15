@@ -1,0 +1,70 @@
+{
+  "source": "User-supplied mmc2(1).zip, 12 original spreadsheets",
+  "provenance": "User describes files as supplementary data to Bishop et al. (2018); independently verifying publisher provenance is outside this local operation",
+  "rows_source_valid": 52493,
+  "flagged_rows": [
+    {
+      "file": "Supplementary DATA on Queues/FIRST BANK (WEEK 1).xlsx",
+      "sheet": "Sheet1",
+      "excel_row": 268,
+      "number": 267,
+      "value": 10033,
+      "reason": "out_of_hours"
+    }
+  ],
+  "observed_hourly_groups": 419,
+  "source_bank_days": 60,
+  "train_bank_days": 45,
+  "holdout_bank_days": 15,
+  "observed_hours_only": "08:00-14:59",
+  "train_weeks": [
+    1,
+    2,
+    3
+  ],
+  "heldout_week": 4,
+  "random_state": 42,
+  "classification": {
+    "accuracy": 0.4,
+    "majority_baseline": 0.4666666666666667,
+    "confusion_matrix_actual_rows_predicted_columns": [
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        3,
+        2,
+        2
+      ]
+    ],
+    "classes": [
+      "low",
+      "moderate",
+      "high"
+    ],
+    "train_cutoffs": {
+      "low_max": 798.0,
+      "moderate_max": 932.0
+    }
+  },
+  "regression": {
+    "mean_residual_observed_minus_predicted": 5.865860709224998,
+    "median_residual_observed_minus_predicted": 8.889857337107259,
+    "heldout_hourly_points": 105
+  },
+  "limitations": [
+    "Not validated for the Philippine branch",
+    "No verified calendar dates: weekday selection is scenario-only",
+    "The source mixes Excel clock fractions and H.MM decimal-encoded minutes; formats were parsed by explicit rule",
+    "No holiday, payday or month features",
+    "No estimates for 15:00\u201317:00",
+    "Do not use for staffing or queue guarantees"
+  ]
+}

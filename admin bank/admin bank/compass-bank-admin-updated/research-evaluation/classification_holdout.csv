@@ -1,0 +1,16 @@
+bank,week,weekday,observed_customer_count,actual_level,predicted_level
+first,4,Friday,996,high,low
+first,4,Monday,857,moderate,high
+first,4,Thursday,899,moderate,high
+first,4,Tuesday,981,high,low
+first,4,Wednesday,1057,high,high
+second,4,Friday,901,moderate,moderate
+second,4,Monday,1017,high,high
+second,4,Thursday,948,high,moderate
+second,4,Tuesday,1009,high,low
+second,4,Wednesday,891,moderate,moderate
+third,4,Friday,752,low,low
+third,4,Monday,988,high,moderate
+third,4,Thursday,891,moderate,moderate
+third,4,Tuesday,784,low,moderate
+third,4,Wednesday,648,low,moderate

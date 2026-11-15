@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compass Bank | SOP 3 Regression Validation</title>
+<style>
+:root{--navy:#132d50;--blue:#285b91;--teal:#087c77;--red:#c24d51;--ink:#24324a;--muted:#68788d;--bg:#f3f6fa;--edge:#dce4ed}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+header{background:linear-gradient(125deg,#132a4d,#204b7b);color:white;padding:24px max(20px,calc((100% - 1180px)/2))}
+header h1{font-size:clamp(22px,3.3vw,30px);line-height:1.2;margin:7px 0}header p{margin:0;color:#dce7f4}header a{color:#e6f6ff}
+nav{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;margin-bottom:7px}
+main{max-width:1180px;padding:22px 18px 42px;margin:auto}
+.notice{background:#fff8e9;border:1px solid #efdaad;border-left:5px solid #b7821e;border-radius:10px;padding:14px 16px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 20px}.card,.panel{background:white;border:1px solid var(--edge);border-radius:14px;box-shadow:0 2px 9px #12274408}
+.card{padding:16px}.card strong{display:block;font-size:25px;letter-spacing:-.03em;line-height:1.3;font-variant-numeric:tabular-nums;color:#14355c}.card span{display:block;color:#5d6b7f;font-size:12px;margin-top:4px}.card small{display:block;color:#8b6a19;font-size:11px;margin-top:6px}
+.panel{padding:21px;margin:0 0 18px}h2{font-size:20px;margin:0 0 7px;color:#17365c}h3{font-size:15px;margin:13px 0 8px}p{margin:6px 0 12px}.muted{color:var(--muted);font-size:13px}
+.controls{display:flex;flex-wrap:wrap;align-items:end;gap:13px;margin:15px 0}.controls label{font-size:13px;font-weight:650}.controls select{display:block;width:190px;max-width:100%;border:1px solid #aebed2;border-radius:8px;padding:10px;font:inherit;background:#fff;margin-top:5px}.button{background:var(--blue);color:white;border:none;border-radius:9px;padding:11px 15px;font-weight:650;cursor:pointer;font:inherit}.button:hover{background:#214d7a}.button:disabled{opacity:.58;cursor:wait}.outline{border:1px solid #b6c8db;background:white;color:#24517a}.outline:hover{background:#f0f7fd}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.figure{border:1px solid #edf0f4;border-radius:11px;padding:12px;min-width:0}.figure h3{margin:2px 0 5px}.figure svg{width:100%;height:auto;display:block;max-height:270px}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:#56677b;margin:6px 0}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.actual{background:var(--teal)}.predicted{background:var(--blue)}.under{background:var(--red)}.over{background:var(--teal)}
+.line{border-top:1px solid #e5eaf0;margin:18px 0}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}th{text-align:left;color:#5b6980;background:#eef3f8;font-weight:700}th,td{padding:9px 11px;border-bottom:1px solid #e8edf2}td:not(:first-child),th:not(:first-child){text-align:right}.pos{color:#aa353c;font-weight:650}.neg{color:#077d76;font-weight:650}
+.footnote{font-size:12px;color:#637086}.status{margin-top:12px;padding:12px 14px;border:1px dashed #aabbd2;background:#f7faff;border-radius:8px;min-height:44px;white-space:pre-wrap;font-size:13px}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.gallery img{display:block;width:100%;height:auto;border:1px solid #e8edf2;border-radius:8px}.toolbar{display:flex;gap:11px;flex-wrap:wrap;margin:13px 0}.toolbar a{color:#205e92;font-weight:600}.check{background:#edf8f4;color:#12614e;padding:10px 13px;border-radius:8px;font-size:13px}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid,.gallery{grid-template-columns:1fr}}@media(max-width:470px){.cards{grid-template-columns:1fr 1fr}.card strong{font-size:21px}.panel{padding:15px}}@media print{header,.controls .button,.toolbar .button{display:none!important}body{background:white}.panel,.card{box-shadow:none;break-inside:avoid}main{padding:4px}.notice{border:1px solid #c99}.figure svg{max-height:200px}}
+</style>
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head>
+<body>
+<header>
+<nav><a href="/employee/">Employee dashboard</a><a href="/employee/research-demo.html">SOP overview</a><a href="/customer/">Customer portal</a></nav>
+<h1>SOP 3 · Random Forest Regression Evaluation</h1>
+<p>Interactive trend comparison, residual distribution, and reproducible holdout evidence</p>
+</header>
+<main>
+<div class="notice"><strong>Research simulation — not an operational bank forecast.</strong> The data were simulated for 2026 from four weeks of 2016 Indonesian teller-queue observations. They are not recorded Philippine branch arrivals. Slot clock times have not been verified, so all visuals use <strong>slots 1–8</strong>, not asserted hours.</div>
+<div class="cards">
+  <div class="card"><strong id="nSlots">—</strong><span>Simulated test observations</span><small>Oct–Dec 2026 chronological holdout</small></div>
+  <div class="card"><strong id="medianRes">—</strong><span>Median |residual| in counts</span><small>Baseline: <span style="display:inline" id="baselineRes">—</span> counts</small></div>
+  <div class="card"><strong id="meanSigned">—</strong><span>Mean signed residual</span><small>Actual minus prediction</small></div>
+  <div class="card"><strong id="within10">—</strong><span>Within ±10 counts</span><small>Exploratory simulated holdout</small></div>
+</div>
+<section class="panel">
+  <h2>1. Select a test date and inspect the eight slots</h2>
+  <p class="muted">Actual values here are <strong>simulated actual</strong> values held out from model training. Predictions come from the saved Random Forest Regression model's test run. Residual = simulated actual − predicted.</p>
+  <div class="controls"><label>Held-out date<select id="dateSelect" aria-label="Select held-out simulation date"></select></label><button type="button" id="liveBtn" class="button">Run trained Random Forest now</button><button type="button" class="button outline" onclick="window.print()">Print this evidence</button></div>
+  <div id="dateSummary" class="check" role="status" aria-live="polite">Loading local training evaluation...</div>
+  <div class="grid" style="margin-top:15px">
+    <div class="figure"><h3>Simulated actual vs. model prediction</h3><div class="legend"><span><i class="dot actual"></i>Simulated actual</span><span><i class="dot predicted"></i>Predicted</span></div><svg id="dayTrend" role="img" aria-label="Line chart comparing simulated actual and predicted customer counts in slots one through eight" viewBox="0 0 800 300"></svg></div>
+    <div class="figure"><h3>Residuals for this selected date</h3><div class="legend"><span><i class="dot under"></i>Positive: underprediction</span><span><i class="dot over"></i>Negative: overprediction</span></div><svg id="dayResiduals" role="img" aria-label="Residual bar chart showing actual minus predicted per slot" viewBox="0 0 800 300"></svg></div>
+  </div>
+  <div class="table-wrap" style="margin-top:16px"><table aria-label="Slot level prediction errors"><thead><tr><th>Ordered slot</th><th>Simulated actual count</th><th>Predicted count</th><th>Residual (actual − predicted)</th></tr></thead><tbody id="slotRows"></tbody></table></div>
+  <div id="liveResult" class="status" role="status" aria-live="polite">Click <strong>Run trained Random Forest now</strong> to verify the live Python API returns predictions for this date. This button runs actual model inference, not hardcoded values.</div>
+</section>
+<section class="panel">
+  <h2>2. Overall holdout evaluation plots</h2>
+  <p class="muted">The trend chart covers the first 120 held-out slot observations. The histogram uses all 528 residuals. Both are generated during the regression training/evaluation process.</p>
+  <div class="gallery"><div><h3>Graphical trend comparison</h3><img id="trendPlot" src="/api/research-demo/plot/trend" alt="Regression test trend comparison of simulated actual counts versus predicted counts"><p class="footnote">Model follows general slot patterns, but individual observations have visible errors.</p></div><div><h3>Residual error distribution</h3><img id="residPlot" src="/api/research-demo/plot/residuals" alt="Histogram of simulated actual minus predicted residuals for the full holdout"><p class="footnote">Positive errors indicate underestimation; negative errors indicate overestimation. The dotted vertical line marks zero residual.</p></div></div>
+  <div class="toolbar"><a href="/employee/regression-holdout-2026.csv" download>Download 528-row holdout CSV</a><a href="/employee/regression-evidence.json" download>Download evaluated JSON</a></div>
+</section>
+<section class="panel">
+  <h2>3. Methodology and limitations for panel defense</h2>
+  <div class="grid"><div><h3>Model design</h3><p>Random Forest Regression with 300 trees, leaf size of 4 and inputs <strong>weekday, month and slot index</strong>. The model was trained on 195 simulated weekdays (1,560 slots) from January–September 2026 and evaluated on the later October–December 2026 dates (66 days, 528 slots).</p><h3>Graph interpretation</h3><p>When the predicted and simulated actual lines are close, errors are small. A <strong>positive residual</strong> means the model underestimated. A <strong>negative residual</strong> means it overestimated. Trend comparison and residual distribution are the primary evaluation evidence.</p></div><div><h3>Observed limitations</h3><p>Even though the model slightly improves upon the training-only slot-median baseline, the improvement is modest. Both training and test data came from the same simulation process, so results cannot validate predictions on an independent branch.</p><p>Because verified arrival timestamps are unavailable, these are <strong>slot-level teller-queue count estimates</strong>, not verified hourly customer arrivals. Real timestamped bank-arrival data are required to establish the full operational objective.</p></div></div>
+</section>
+<p class="footnote">This page is an isolated research demonstration. It does not alter the bank's database, appointment workflow, admin credentials, customer scheduling, or model training. Validation data originate from the installed model's local regression_holdout.csv.</p>
+</main>
+<script>
+(()=>{'use strict';
+const el=id=>document.getElementById(id);
+const svgNS='http://www.w3.org/2000/svg';
+const fmt=n=>Number(n).toFixed(2);
+const coord=(n,low,high,a,b)=>a+(n-low)/(high-low)*(b-a);
+function node(parent,tag,attrs,text){const e=document.createElementNS(svgNS,tag);for(const [k,v] of Object.entries(attrs||{}))e.setAttribute(k,String(v));if(text!==undefined)e.textContent=String(text);parent.appendChild(e);return e;}
+function clear(id){el(id).replaceChildren();}
+function scaffold(svg,title,top,bottom,labels){
+  node(svg,'title',{},title);
+  for(let i=0;i<=4;i++){
+    const val=bottom+(top-bottom)*i/4,y=238-i*196/4;
+    node(svg,'line',{x1:63,y1:y,x2:775,y2:y,stroke:'#dce4ec','stroke-dasharray':'3,4'});
+    node(svg,'text',{x:54,y:y+4,'text-anchor':'end',fill:'#60748a','font-size':12},Math.round(val));
+  }
+  labels.forEach((v,i)=>node(svg,'text',{x:90+i*(650/7),y:264,'text-anchor':'middle','font-size':12,fill:'#51677d'},v));
+  node(svg,'text',{x:418,y:292,'text-anchor':'middle','font-size':13,fill:'#60748a'},'Sequential slot index (clock times unverified)');
+}
+function drawTrend(slots){
+  clear('dayTrend');const svg=el('dayTrend');const high=Math.ceil(Math.max(10,...slots.map(s=>Math.max(s.actual,s.predicted)))*1.16/10)*10;
+  scaffold(svg,'Simulated actual and predicted counts by slot',high,0,slots.map(s=>s.slot));
+  for(const [key,color] of [['actual','#087c77'],['predicted','#285b91']]){
+    const points=slots.map((s,i)=>(90+i*650/7)+','+coord(s[key],0,high,238,42));
+    node(svg,'polyline',{points:points.join(' '),fill:'none',stroke:color,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});
+    slots.forEach((s,i)=>node(svg,'circle',{cx:90+i*650/7,cy:coord(s[key],0,high,238,42),r:5,fill:color}));
+  }
+}
+function drawResiduals(slots){
+  clear('dayResiduals');const svg=el('dayResiduals');const magnitude=Math.max(5,Math.ceil(Math.max(...slots.map(s=>Math.abs(s.residual)))/5)*5);
+  node(svg,'title',{},'Residual by slot, simulated actual minus predicted');
+  const zero=140;
+  for(const v of [-magnitude,-magnitude/2,0,magnitude/2,magnitude]){
+    const y=coord(v,-magnitude,magnitude,240,40);node(svg,'line',{x1:62,y1:y,x2:774,y2:y,stroke:v===0?'#667d94':'#dce4ec','stroke-width':v===0?2:1,'stroke-dasharray':v===0?'none':'3,4'});
+    node(svg,'text',{x:54,y:y+4,'text-anchor':'end',fill:'#61758a','font-size':12},Number(v.toFixed(1)));
+  }
+  slots.forEach((s,i)=>{
+    const x=85+i*650/7,y=coord(s.residual,-magnitude,magnitude,240,40);
+    node(svg,'rect',{x,y:Math.min(y,zero),width:34,height:Math.max(1,Math.abs(zero-y)),fill:s.residual>=0?'#c24d51':'#087c77',rx:2});
+    node(svg,'text',{x:x+17,y:264,'text-anchor':'middle','font-size':12,fill:'#51677d'},s.slot);
+  });
+  node(svg,'text',{x:418,y:292,'text-anchor':'middle','font-size':13,fill:'#60748a'},'Sequential slot index');
+}
+let report=null;
+function displayDay(){
+  if(!report)return;
+  const day=report.days.find(x=>x.date===el('dateSelect').value);
+  if(!day)return;
+  const totalSim=day.simulated_actual_total,totalPred=day.predicted_slot_total;
+  el('dateSummary').textContent=`${day.date} • 8 simulated observations • Simulated total: ${fmt(totalSim)} • Predicted total: ${fmt(totalPred)} • Daily residual: ${fmt(totalSim-totalPred)} counts`;
+  const tbody=el('slotRows');tbody.replaceChildren();
+  for(const r of day.slots){
+    const tr=document.createElement('tr');
+    const items=[`Slot ${r.slot}`,fmt(r.actual),fmt(r.predicted),(r.residual>=0?'+':'')+fmt(r.residual)];
+    items.forEach((t,i)=>{const td=document.createElement('td');td.textContent=t;if(i===3)td.className=r.residual>=0?'pos':'neg';tr.appendChild(td)});
+    tbody.appendChild(tr);
+  }
+  drawTrend(day.slots);drawResiduals(day.slots);
+  el('liveResult').textContent='Click “Run trained Random Forest now” to call the live Python inference API and compare its eight predictions to this saved holdout.';
+}
+async function runLive(){
+  const btn=el('liveBtn');btn.disabled=true;el('liveResult').textContent='Calling Random Forest prediction API...';
+  try{
+    const date=el('dateSelect').value;
+    const r=await fetch('/api/research-demo/forecast?date='+encodeURIComponent(date),{cache:'no-store'});
+    const d=await r.json();if(!r.ok||d.status!=='ok')throw Error(d.message||'API unavailable');
+    if(!Array.isArray(d.estimated_slots)||d.estimated_slots.length!==8)throw Error('API did not return eight slots');
+    const stored=report.days.find(x=>x.date===date);
+    const same=stored.slots.every((s,i)=>Number(d.estimated_slots[i].slot)===s.slot&&Math.abs(Number(d.estimated_slots[i].estimated_count)-s.predicted)<0.06);
+    el('liveResult').textContent=`Trained Python Random Forest API: SUCCESS\nSelected date: ${d.date}\nEight predicted slots returned: ${d.estimated_slots.map(s=>s.estimated_count).join(', ')}\nAgreement with saved holdout predictions (allowing 0.1 rounding): ${same?'8 / 8 MATCH':'MISMATCH — investigate model/data versions'}\nThis confirms model inference on simulated research features, NOT observed Philippine bank accuracy.`;
+  }catch(e){el('liveResult').textContent='API test failed: '+e.message;}finally{btn.disabled=false;}
+}
+async function boot(){
+  try{
+    const r=await fetch('/employee/regression-evidence.json',{cache:'no-store'});
+    if(!r.ok)throw Error('Evidence data file missing (HTTP '+r.status+'). Run SOP3 installer.');
+    report=await r.json();const m=report.metrics,meta=report.metadata;
+    if(!Array.isArray(report.days)||report.days.length!==66||meta.test_slots!==528)throw Error('Incomplete holdout evidence');
+    el('nSlots').textContent=meta.test_slots+' / '+meta.test_days+' days';
+    el('medianRes').textContent=fmt(m.median_absolute_residual);
+    el('baselineRes').textContent=fmt(m.baseline_median_absolute_residual);
+    el('meanSigned').textContent=(m.mean_signed_residual>0?'+':'')+fmt(m.mean_signed_residual);
+    el('within10').textContent=(100*m.share_within_10_counts).toFixed(2)+'%';
+    const select=el('dateSelect');for(const day of report.days){const option=document.createElement('option');option.value=day.date;option.textContent=day.date;select.appendChild(option);}
+    select.value=report.days.some(d=>d.date==='2026-11-19')?'2026-11-19':report.days[0].date;
+    select.addEventListener('change',displayDay);el('liveBtn').addEventListener('click',runLive);
+    displayDay();
+  }catch(e){el('dateSummary').textContent='Evaluation evidence error: '+e.message;el('liveBtn').disabled=true;}
+}
+boot();
+})();
+</script>
+
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+
+<script defer src="./compass-sop3-selected-date-wide.js?v=20261115162815"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body>
+</html>

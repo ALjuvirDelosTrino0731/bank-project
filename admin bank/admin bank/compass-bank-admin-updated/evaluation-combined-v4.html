@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compass Bank | Classification and Regression Evaluation</title><style>
+*{box-sizing:border-box}body{background:#f3f5f7;color:#17243a;margin:0;font:14px/1.65 Inter,Segoe UI,Arial,sans-serif}main{max-width:1350px;margin:auto;padding:12px 16px 35px}h1,h2,h3{font-family:Georgia,serif;margin:0 0 11px;color:#18233d}h1{font-size:27px}h2{font-size:21px}h3{font-size:17px}p{margin:9px 0 15px;color:#4b586b}.card{background:#fff;border:1px solid #e0e5ed;border-radius:18px;margin:16px 0;padding:24px}.warn{background:#fff5dc;border-left:4px solid #d19a1f;border-radius:10px;padding:15px}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}.metric{background:#f5f7fa;border:1px solid #edf0f5;border-radius:14px;padding:13px}.metric small{display:block;color:#576477}.metric strong{display:block;font-size:23px;color:#352052}.controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.controls label{display:flex;flex-direction:column;gap:5px;font-weight:700}.controls select{padding:11px;border:1px solid #bfc7d5;background:#fff;color:#16273d;border-radius:10px;min-width:155px}button{border:0;border-radius:10px;padding:11px 16px;background:#7850aa;color:#fff;font-weight:750;cursor:pointer}button:disabled{opacity:.6}a{color:#6846a0;font-weight:650}.plot-grid{display:grid;grid-template-columns:1fr;gap:22px;margin-top:15px}.plot{margin:0;padding:18px;background:#fafbfc;border:1px solid #e2e5ed;border-radius:14px;min-width:0}.plot img{width:100%;height:auto;max-width:none;display:block}.plot figcaption{font-size:13px;color:#4b586b;margin-top:12px}.explain{background:#f3f6fa;border:1px solid #e4e9f0;padding:15px;border-radius:12px;line-height:1.65}.cm{border-collapse:collapse;width:100%;max-width:640px;margin:13px 0}.cm th,.cm td{border:1px solid #d8e0e9;padding:10px;text-align:center}.cm th{background:#f4f5f9}.cm td{font-weight:750;font-size:17px}.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.svg-wrap{overflow-x:auto}.svg-wrap svg{display:block;width:100%;min-width:550px;height:auto;background:#fff;border:1px solid #e0e6ec;border-radius:12px}#archiveFrame{width:100%;height:1200px;border:1px solid #dce2eb;border-radius:10px;background:white}code{background:#f3f4f6;padding:1px 4px}@media(max-width:800px){.two{grid-template-columns:1fr}.card{padding:16px}}
+</style>
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head><body><main><h1>Model Evaluation — Classification and Regression</h1><p>This page reports two distinct research datasets. The integrated prediction system uses simulated 2026 teller-queue counts, while the archived comparison uses four weeks of Nigerian banking observations.</p><div class="warn"><strong>Research-only accuracy.</strong> Neither model demonstrates validated Philippine bank arrivals. The 2026 set is simulated, the eight slot times are unverified, and the current pre-visit classifier has weak held-out accuracy.</div>
+<section class="card"><h2>1. Current integrated models — simulated 2026 data</h2><p id="source">Loading the actual saved model metrics...</p><div class="metrics"><div class="metric"><small>Training business days</small><strong id="trainDays">—</strong></div><div class="metric"><small>Test business days</small><strong id="testDays">—</strong></div><div class="metric"><small>Classification accuracy</small><strong id="accuracy">—</strong></div><div class="metric"><small>Regression median absolute residual</small><strong id="median">—</strong></div><div class="metric"><small>Simple residual baseline</small><strong id="baseline">—</strong></div><div class="metric"><small>Signed residual</small><strong id="signed">—</strong></div></div><p class="explain" id="metricsExplain">Explanations update when metrics are loaded.</p></section>
+<section class="card"><h2>2. Classification — Low, Moderate, High</h2><p>Each confusion-matrix row is the actual simulated category; each column is the predicted category. The diagonal shows correct classifications.</p><table class="cm"><thead><tr><th>Actual / Predicted</th><th>Low</th><th>Moderate</th><th>High</th></tr></thead><tbody id="matrix"><tr><td colspan="4">Loading...</td></tr></tbody></table><p class="explain" id="classificationExplain">Results and limitations will be explained here.</p><figure class="plot"><img alt="Simulated 2026 classification confusion matrix" src="/api/research-demo/plot/confusion" onerror="this.onerror=null;this.src='research-v4/confusion_matrix.png'"><figcaption id="cmCaption">A darker cell indicates more simulated test days. High error rates mean the model is not dependable as a real booking recommendation.</figcaption></figure></section>
+<section class="card"><h2>3. Regression — interactive simulated test-day comparison</h2><p>Select a test date to see eight actual simulated slot counts and model estimates. This is <strong>not</strong> a 9 AM–5 PM real-arrival chart.</p><div class="controls"><label>Held-out test day<select id="date"><option value="">Loading dates...</option></select></label><button type="button" id="reload">Reload test evidence</button><a href="research-v4/regression_holdout.csv" download>Download regression holdout CSV</a><a href="research-v4/classification_holdout.csv" download>Download classification holdout CSV</a></div><p id="dateStatus" role="status">Loading saved test rows...</p><div class="svg-wrap" id="dailyChart"></div><p class="explain" id="dailyExplain">Select a date to update the chart interpretation.</p></section>
+<section class="card"><h2>4. Full holdout graphs — simulated records</h2><p>The plots below summarize all 528 simulated test-slot rows. They are not real customer visits.</p><div class="plot-grid"><figure class="plot"><h3>Actual vs predicted (all test slots)</h3><img src="/api/research-demo/plot/trend" alt="Actual versus predicted simulated slot counts" onerror="this.onerror=null;this.src='research-v4/actual_vs_predicted.png'"><figcaption id="trendText">The closer predicted and simulated actual values are, the smaller the error.</figcaption></figure><figure class="plot"><h3>Residual distribution</h3><img src="/api/research-demo/plot/residuals" alt="Regression residual distribution" onerror="this.onerror=null;this.src='research-v4/residual_distribution.png'"><figcaption id="resText">A residual is simulated actual count minus predicted count. Positive residuals mean underestimation.</figcaption></figure></div></section>
+<section class="card"><h2>5. Separate archived comparison — Nigerian observed data</h2><p>The older Nigerian-source classifier and regressor were trained on four observation weeks. This dataset and these metrics are not those used by the current 2026 simulation panels.</p><button type="button" id="historicalToggle" aria-expanded="false">Show historical real-data evaluation</button><div id="historicalPanel" hidden><iframe id="archiveFrame" title="Archived Nigerian four-week evaluation" loading="lazy"></iframe></div></section>
+</main><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);let rows=[],meta=null;const pct=x=>(100*Number(x)).toFixed(2)+'%';const round=x=>Number(x).toFixed(2);const what=v=>Number.isFinite(Number(v))?round(v):'Not reported';function cell(t,x){const n=document.createElement(t);n.textContent=x;return n;}
+function csvParse(text){const lines=[];let fields=[],field='',inside=false;for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(inside&&text[i+1]==='"'){field+='"';i++;}else inside=!inside;}else if(c===','&&!inside){fields.push(field);field='';}else if((c==='\n'||c==='\r')&&!inside){if(c==='\r'&&text[i+1]==='\n')i++;fields.push(field);field='';if(fields.some(x=>x!==''))lines.push(fields);fields=[];}else field+=c;}if(field||fields.length){fields.push(field);lines.push(fields);}if(!lines.length)return[];const keys=lines.shift().map(x=>x.replace(/^\uFEFF/,''));return lines.map(a=>Object.fromEntries(keys.map((k,i)=>[k,a[i]??''])));}
+async function metrics(){let data;try{const r=await fetch('/api/research-demo/evaluation',{cache:'no-store'});data=await r.json();if(!r.ok||data.status!=='ok')throw Error('Endpoint unavailable');$('source').textContent='Source: verified local research-model evaluation API — fully simulated 2026 records derived from four weeks of Indonesian BCA teller-queue reference data.';}catch(e){const r=await fetch('research-v4/metrics.json');data={metrics:await r.json()};$('source').textContent='Research evaluation API unavailable; showing saved 2026 model metrics from the installed package.';}
+ const m=data.metrics||{};meta=m;const assign=(id,value)=>$(id).textContent=value;
+ assign('trainDays',m.training_days??195);assign('testDays',m.test_days??66);assign('accuracy',pct(m.classification_previsit_accuracy));assign('median',what(m.regression_median_absolute_residual)+' counts');assign('baseline',what(m.regression_slot_median_baseline_median_absolute_residual)+' counts');assign('signed', (Number(m.regression_mean_signed_residual)>=0?'+':'')+what(m.regression_mean_signed_residual)+' counts');
+ const a=Number(m.classification_previsit_accuracy),b=Number(m.classification_previsit_majority_baseline_accuracy),e=Number(m.regression_median_absolute_residual),baseline=Number(m.regression_slot_median_baseline_median_absolute_residual);
+ $('metricsExplain').textContent=`The classifier scored ${pct(a)} on simulated test days, compared with ${pct(b)} for predicting the majority class. The regression model had a median absolute residual of ${what(e)} versus ${what(baseline)} for a simple slot baseline. These are small or weak gains; functioning predictions are not proof of real-world accuracy.`;
+ const mat=m.classification_previsit_confusion_matrix||[];const body=$('matrix');body.replaceChildren();const labs=['Low','Moderate','High'];let sum=0,correct=0;mat.forEach((rr,i)=>{const tr=cell('tr','');tr.append(cell('th',labs[i]));rr.forEach((v,j)=>{sum+=Number(v);if(i===j)correct+=Number(v);tr.append(cell('td',String(v)));});body.append(tr);});$('classificationExplain').textContent=mat.length===3?`The model correctly predicted ${correct} of ${sum} simulated days. Only ${mat[2][2]} of ${mat[2].reduce((a,b)=>a+b,0)} actual High days were recognized as High. This limits the value of the date-only classification for planning.`:'No usable confusion matrix was returned.';
+ $('trendText').textContent=`This graph compares predictions with all ${m.test_days?m.test_days*8:528} simulated test slots. The median absolute error is ${what(e)} counts; a close visual pattern alone is not proof of real bank accuracy.`;
+ const signed=Number(m.regression_mean_signed_residual);$('resText').textContent=`Residual = simulated actual minus predicted count. The mean signed residual is ${signed>=0?'+':''}${what(signed)}: ${signed>=0?'the model tends to underestimate':'the model tends to overestimate'} on this simulated test set. Values near zero indicate closer predictions.`;
+}
+function displayDay(){const selected=$('date').value;const day=rows.filter(x=>x.date===selected).sort((a,b)=>Number(a.slot_index)-Number(b.slot_index));if(!day.length){$('dateStatus').textContent='No rows for the selected date.';$('dailyChart').replaceChildren();$('dailyExplain').textContent='Select another date.';return;}
+ const maximum=Math.max(1,...day.flatMap(x=>[+x.customer_count,+x.predicted_count]));let maxerr=0,sum=0;
+ const width=920,height=360,l=78,r=35,t=25,b=48,chartW=width-l-r,chartH=height-t-b;let svg=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Actual and predicted counts for ${selected} in eight simulated slots" xmlns="http://www.w3.org/2000/svg"><rect width="${width}" height="${height}" fill="white"/>`;
+ for(let k=0;k<=4;k++){const y=t+chartH*k/4,val=Math.round(maximum*(1-k/4));svg+=`<line x1="${l}" y1="${y}" x2="${width-r}" y2="${y}" stroke="#e4e8ee"/><text x="${l-12}" y="${y+4}" text-anchor="end" font-size="13" fill="#546077">${val}</text>`;}
+ day.forEach((x,i)=>{const a=+x.customer_count,p=+x.predicted_count;sum+=Math.abs(a-p);maxerr=Math.max(maxerr,Math.abs(a-p));const center=l+(i+.5)*chartW/day.length;const bw=Math.min(30,chartW/day.length*.22);const ah=a/maximum*chartH,ph=p/maximum*chartH;svg+=`<rect x="${center-bw-2}" y="${t+chartH-ah}" width="${bw}" height="${ah}" fill="#7b4db1"><title>Slot ${i+1}, simulated actual: ${a}</title></rect><rect x="${center+2}" y="${t+chartH-ph}" width="${bw}" height="${ph}" fill="#9bb823"><title>Slot ${i+1}, predicted: ${p.toFixed(1)}</title></rect><text x="${center}" y="${height-23}" text-anchor="middle" font-size="13" fill="#253047">Slot ${i+1}</text>`;});
+ svg+=`<rect x="${width-340}" y="4" width="15" height="13" fill="#7b4db1"/><text x="${width-317}" y="16" font-size="13">Simulated actual</text><rect x="${width-167}" y="4" width="15" height="13" fill="#9bb823"/><text x="${width-144}" y="16" font-size="13">Predicted</text></svg>`;
+ $('dailyChart').innerHTML=svg;$('dateStatus').textContent=`Selected ${selected}: ${day.length} simulated numbered slots (not clock hours).`;
+ const avg=sum/day.length;$('dailyExplain').textContent=`For ${selected}, the average absolute difference across ${day.length} slots is ${avg.toFixed(2)} counts; the largest individual difference is ${maxerr.toFixed(2)}. Purple = generated test count; olive = model prediction. This day-specific summary changes when a different date is selected.`;
+}
+async function loadEvidence(){const r=await fetch('research-v4/regression_holdout.csv',{cache:'no-store'});if(!r.ok)throw Error('Saved holdout CSV unavailable');rows=csvParse(await r.text());if(!rows.length||rows.some(x=>!('date'in x)||!('predicted_count'in x)))throw Error('Invalid test CSV');const dates=[...new Set(rows.map(x=>x.date))].sort();$('date').replaceChildren(...dates.map(x=>{const o=cell('option',x);o.value=x;return o;}));if(dates.includes('2026-11-19'))$('date').value='2026-11-19';$('date').onchange=displayDay;displayDay();}
+async function reload(){const b=$('reload');b.disabled=true;try{await Promise.all([metrics(),loadEvidence()]);}catch(e){$('dateStatus').textContent='Evaluation evidence unavailable: '+e.message;}finally{b.disabled=false;}}
+$('reload').onclick=reload;$('historicalToggle').onclick=()=>{const el=$('historicalPanel');el.hidden=!el.hidden;$('historicalToggle').textContent=el.hidden?'Show historical real-data evaluation':'Hide historical real-data evaluation';$('historicalToggle').setAttribute('aria-expanded',String(!el.hidden));if(!el.hidden&&!$('archiveFrame').getAttribute('src'))$('archiveFrame').src='evaluation-reconciled.html';};reload();
+})();
+</script>
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body></html>

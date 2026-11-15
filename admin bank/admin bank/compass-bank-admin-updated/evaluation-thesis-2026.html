@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compass Bank | ML Evaluation: Real vs Simulated</title>
+<style>
+:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#09382e;background:#f5f7f5}*{box-sizing:border-box}
+body{margin:0}main{max-width:1120px;margin:auto;padding:26px 22px 54px}h1{font-size:clamp(1.65rem,3.4vw,2.4rem);margin:6px 0}
+h2{font-size:1.4rem;margin:0 0 12px}h3{font-size:1.1rem;margin:24px 0 10px}p{line-height:1.65}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;color:#5b677c;text-transform:uppercase}
+.card{background:white;border:1px solid #dce6df;border-radius:18px;padding:22px;margin:18px 0}
+.notice{background:#fff0d1;border-left:5px solid #a97422;padding:15px 18px;border-radius:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.metric{background:#f0f4f1;border-radius:12px;padding:15px}
+.metric b{display:block;font-size:26px;color:#175b42;margin-top:4px}.metric small{color:#596a61}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:500px}th,td{border-bottom:1px solid #e0e8e2;padding:12px;text-align:left;vertical-align:top}th{background:#f1f5f1}td{font-variant-numeric:tabular-nums}
+.center th,.center td{text-align:center}.center th:first-child{text-align:left}
+.plot{margin:14px 0 24px}.plot img{display:block;max-width:100%;width:100%;height:auto;background:white;border:1px solid #e0e5e0;border-radius:12px}
+.plot figcaption{color:#5b6b61;font-size:13px;margin-top:7px}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 20px}.tag{background:#e8f0e7;border-radius:99px;font-size:12px;font-weight:700;padding:4px 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}nav a{background:#c6d52c;border-radius:12px;padding:10px 14px;text-decoration:none;color:#111e19;font-weight:700}
+a{color:#14568a}code{overflow-wrap:anywhere}#loadStatus{color:#53665e}
+</style>
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head><body>
+<!-- COMPASS SYNTHETIC EVALUATION PANEL START -->
+<style>
+  #compass-synthetic-results {max-width:1160px;margin:24px auto;padding:22px;background:#fff;border:1px solid #dfe7e1;border-radius:18px;color:#12332d;font-family:Arial,sans-serif;}
+  #compass-synthetic-results h2 {font-size:1.4rem;margin:8px 0 5px;color:#06392e;}
+  #compass-synthetic-results p {line-height:1.5;}
+  #compass-synthetic-results .cb-tag {font-size:11px;font-weight:800;letter-spacing:.08em;color:#42605c;}
+  #compass-synthetic-results .cb-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin:16px 0;}
+  #compass-synthetic-results .cb-card {background:#f0f5f1;border-radius:12px;padding:14px;}
+  #compass-synthetic-results .cb-card b {display:block;font-size:1.65rem;color:#064d3b;margin:7px 0;}
+  #compass-synthetic-results .cb-card small {font-size:12px;color:#48635a;}
+  #compass-synthetic-results table {border-collapse:collapse;width:100%;margin:12px 0;}
+  #compass-synthetic-results th,#compass-synthetic-results td {padding:10px;text-align:center;border-bottom:1px solid #dce6e0;}
+  #compass-synthetic-results th:first-child,#compass-synthetic-results td:first-child {text-align:left;}
+  #compass-synthetic-results .cb-note {padding:12px;background:#f6f7ec;border-left:4px solid #a7b940;border-radius:8px;font-size:13px;}
+</style>
+<section id="compass-synthetic-results" aria-label="Additional synthetic experiment evaluation">
+  <div class="cb-tag">ADDITIONAL EXPERIMENT / SYNTHETIC DATA ONLY</div>
+  <h2>New synthetic bank-traffic evaluation (2024&#8211;2026)</h2>
+  <p>This is a <strong>separate experiment</strong> from the original Dataset B shown below.
+    Random Forest was trained on 576 simulated business days and evaluated on 144 later, held-out simulated business days.
+    These metrics were imported from the generated <code>metrics.json</code> evaluation report.</p>
+  <div class="cb-grid">
+    <div class="cb-card">Classification accuracy<b>95.14%</b><small>137 of 144 days correctly classified</small></div>
+    <div class="cb-card">Balanced classification accuracy<b>94.93%</b><small>Across low, moderate, high traffic</small></div>
+    <div class="cb-card">Majority-class baseline<b>40.28%</b><small>Reference classifier</small></div>
+    <div class="cb-card">Regression median absolute residual<b>1.28</b><small>Simulated visitors per hour</small></div>
+    <div class="cb-card">Regression baseline residual<b>5.00</b><small>Training-median baseline</small></div>
+    <div class="cb-card">Regression mean signed residual<b>-0.18</b><small>Actual minus predicted</small></div>
+  </div>
+  <h3>Random Forest classification &#8212; held-out confusion matrix</h3>
+  <table><thead><tr><th scope="col">Actual / Predicted</th><th scope="col">Low</th><th scope="col">Moderate</th><th scope="col">High</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Low</th><td>40</td><td>0</td><td>0</td></tr>
+      <tr><th scope="row">Moderate</th><td>2</td><td>39</td><td>5</td></tr>
+      <tr><th scope="row">High</th><td>0</td><td>0</td><td>58</td></tr>
+    </tbody></table>
+  <p class="cb-note"><strong>Research limitation:</strong> These models were evaluated only on artificially generated patterns.
+    This result does not establish 95% accuracy on actual Philippine bank customers. Original Dataset B results below
+    remain unchanged. This panel does not mean the live forecasting API serves these newer trained models.</p>
+</section>
+<!-- COMPASS SYNTHETIC EVALUATION PANEL END -->
+<main>
+
+<div class="eyebrow">Dataset intelligence / research evaluation</div>
+<h1>Random Forest: Observed vs Simulated Data</h1>
+
+<p>Classification and regression are evaluated <strong>separately within each dataset</strong>. These are saved holdout results from models already trained in the project, not a live retraining run.</p>
+
+<p class="notice"><b>Two different research experiments.</b> The observed Nigerian data cover four weeks and are not Philippine bank data. The 2026 data are entirely simulated using assumptions informed by January 2016 Indonesian teller-queue observations. Different traffic scales and test sets mean their accuracies and residual counts cannot be treated as a fair head-to-head benchmark.</p>
+
+<nav><a href="#observed">Observed Nigerian dataset</a><a href="#simulated">Simulated 2026 dataset</a><a href="#comparison">Side-by-side summary</a></nav>
+
+<section id="comparison" class="card">
+<h2>Dataset and performance comparison</h2>
+<p id="loadStatus">Loading saved model evaluation files...</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Performance evidence</th><th>Observed Nigerian data</th><th>Simulated 2026 data</th></tr></thead>
+<tbody id="comparisonRows"></tbody>
+</table></div>
+<p><small>Classification: higher accuracy is better <em>within the same test set</em>. Regression: smaller median absolute residual is better <em>within the same data scale</em>. Residual = actual count minus predicted count.</small></p>
+</section>
+
+<section id="observed" class="card">
+<div class="eyebrow">Dataset A / Recorded historical observations</div>
+<h2>Observed Nigerian bank arrivals</h2>
+<div class="tags"><span class="tag">Three banks</span><span class="tag">Four observation weeks</span><span class="tag">Train weeks 1-3, test week 4</span><span class="tag">Not live Philippine data</span></div>
+<div class="grid" id="observedKpis"></div>
+<h3>Random Forest Classification — confusion matrix</h3>
+<div class="table-wrap" id="observedMatrix"></div>
+<h3>Random Forest Regression — actual vs predicted</h3>
+<figure class="plot"><img src="research-evaluation/reconciled/regression_bank_1_actual_vs_predicted.png" alt="Observed Nigerian Bank 1: actual versus predicted arrivals"><figcaption>Bank 1: observed and predicted arrivals in the held-out period</figcaption></figure>
+<figure class="plot"><img src="research-evaluation/reconciled/regression_bank_2_actual_vs_predicted.png" alt="Observed Nigerian Bank 2: actual versus predicted arrivals"><figcaption>Bank 2: observed and predicted arrivals</figcaption></figure>
+<figure class="plot"><img src="research-evaluation/reconciled/regression_bank_3_actual_vs_predicted.png" alt="Observed Nigerian Bank 3: actual versus predicted arrivals"><figcaption>Bank 3: observed and predicted arrivals</figcaption></figure>
+<h3>Regression residual distribution</h3>
+<figure class="plot"><img src="research-evaluation/reconciled/regression_residual_distribution.png" alt="Observed Nigerian arrivals: regression residual distribution"><figcaption>Actual minus predicted, in observed customers per hour</figcaption></figure>
+<p>Source evidence: <a href="research-evaluation/reconciled/classification_holdout.csv">Classification test CSV</a> · <a href="research-evaluation/reconciled/regression_holdout.csv">Regression test CSV</a> · <a href="research-evaluation/reconciled/evaluation_metrics.json">Saved metrics JSON</a></p>
+</section>
+
+<section id="simulated" class="card">
+<div class="eyebrow">Dataset B / Entirely simulated research records</div>
+<h2>Simulated 2026 bank teller-queue traffic</h2>
+<div class="tags"><span class="tag">261 weekdays</span><span class="tag">2,088 numbered-slot rows</span><span class="tag">Train Jan-Sep, test Oct-Dec 2026</span><span class="tag">Clock-hour assignments unverified</span></div>
+<div class="grid" id="simulatedKpis"></div>
+<h3>Random Forest Classification — confusion matrix</h3>
+<div class="table-wrap" id="simulatedMatrix"></div>
+<h3>Random Forest Regression — actual vs predicted</h3>
+<figure class="plot"><img src="research-evaluation/simulated-2026/actual_vs_predicted.png" alt="Simulated 2026 customer counts versus Random Forest predictions"><figcaption>Observed-in-simulation counts versus predictions for the synthetic holdout</figcaption></figure>
+<h3>Regression residual distribution</h3>
+<figure class="plot"><img src="research-evaluation/simulated-2026/residual_distribution.png" alt="Simulated 2026 regression residual distribution"><figcaption>Simulated actual count minus predicted count, per numbered slot (not a verified clock hour)</figcaption></figure>
+<p>Source evidence: <a href="research-evaluation/simulated-2026/classification_holdout.csv">Classification test CSV</a> · <a href="research-evaluation/simulated-2026/regression_holdout.csv">Regression test CSV</a> · <a href="research-evaluation/simulated-2026/evaluation_metrics.json">Saved metrics JSON</a></p>
+</section>
+
+<section class="card"><h2>How to interpret the findings</h2>
+<p>The observed-data experiment achieved its recorded test results on a limited four-week Nigerian sample. The synthetic experiment achieved a <strong>24.24% classification accuracy</strong> and only a small regression improvement over its slot-median baseline. Neither model has been validated against arrivals at a Philippine branch, and the synthetic dataset does not add actual historical observations.</p>
+<p><b>Method:</b> These plots and metrics are from saved trained-model predictions on held-out records. The interface does not claim that opening this page trains or tests a new model. To refresh the evidence after retraining, update the saved model outputs and rerun this PowerShell patch.</p>
+</section>
+
+</main><script>
+const realUrl='research-evaluation/reconciled/evaluation_metrics.json';
+const simUrl='research-evaluation/simulated-2026/evaluation_metrics.json';
+const percentage=v=>(100*Number(v)).toFixed(2)+'%';
+const decimal=v=>Number(v).toFixed(2);
+const elt=id=>document.getElementById(id);
+
+function metric(container,label,value,note){
+ const box=document.createElement('div');box.className='metric';
+ const heading=document.createElement('span');heading.textContent=label;
+ const number=document.createElement('b');number.textContent=value;
+ const small=document.createElement('small');small.textContent=note;
+ box.append(heading,number,small);container.append(box);
+}
+function matrix(container,rows){
+ const table=document.createElement('table');table.className='center';
+ const head=document.createElement('thead'), hr=document.createElement('tr');
+ ['Actual / Predicted','Low','Moderate','High'].forEach(s=>{const th=document.createElement('th');th.textContent=s;hr.append(th)});head.append(hr);table.append(head);
+ const body=document.createElement('tbody');
+ rows.forEach((row,i)=>{const tr=document.createElement('tr'),th=document.createElement('th');th.textContent=['Low','Moderate','High'][i];tr.append(th);row.forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.append(td)});body.append(tr)});
+ table.append(body);container.replaceChildren(table);
+}
+function addRow(title,observed,synthetic){
+ const tr=document.createElement('tr');[title,observed,synthetic].forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.append(td)});elt('comparisonRows').append(tr);
+}
+async function load(){
+ try{
+ const [a,b]=await Promise.all([realUrl,simUrl].map(async url=>{const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error(url+' HTTP '+response.status);return response.json()}));
+ const rK=elt('observedKpis'),sK=elt('simulatedKpis');
+ metric(rK,'Classification accuracy',percentage(a.classification_accuracy),a.daily_test+' test days');
+ metric(rK,'Classification baseline',percentage(a.classification_baseline_accuracy),'Majority-class classifier');
+ metric(rK,'Balanced accuracy',percentage(a.classification_balanced_accuracy),'Class-balanced classification score');
+ metric(rK,'Regression median absolute residual',decimal(a.regression_median_absolute_residual),'Observed customers per hour');
+ metric(rK,'Regression baseline residual',decimal(a.regression_baseline_median_absolute_residual),'Observed customers per hour');
+ metric(rK,'Regression mean signed residual',decimal(a.regression_mean_residual),'Actual minus predicted');
+ metric(sK,'Classification accuracy',percentage(b.classification_accuracy),b.classification_test_days+' simulated test days');
+ metric(sK,'Classification baseline',percentage(b.classification_majority_baseline_accuracy),'Majority-class classifier');
+ metric(sK,'Balanced accuracy',percentage(b.classification_balanced_accuracy),'Class-balanced classification score');
+ metric(sK,'Regression median absolute residual',decimal(b.regression_median_absolute_residual),'Simulated counts per slot');
+ metric(sK,'Regression baseline residual',decimal(b.regression_slot_median_baseline_median_absolute_residual),'Simulated counts per slot');
+ metric(sK,'Regression mean signed residual',decimal(b.regression_mean_signed_residual_actual_minus_predicted),'Actual minus predicted');
+ matrix(elt('observedMatrix'),a.classification_confusion_matrix);
+ matrix(elt('simulatedMatrix'),b.confusion_matrix);
+ addRow('Source','Four weeks of recorded Nigerian bank-arrival observations','Simulated 2026 records informed by BCA Indonesia (2016)');
+ addRow('Classification training / testing',a.daily_train+' / '+a.daily_test+' days',b.classification_train_days+' / '+b.classification_test_days+' days');
+ addRow('Classification test accuracy',percentage(a.classification_accuracy),percentage(b.classification_accuracy));
+ addRow('Majority-class baseline',percentage(a.classification_baseline_accuracy),percentage(b.classification_majority_baseline_accuracy));
+ addRow('Balanced accuracy',percentage(a.classification_balanced_accuracy),percentage(b.classification_balanced_accuracy));
+ addRow('Regression training / testing',a.hourly_train+' / '+a.hourly_test+' observed hours',b.regression_train_slots+' / '+b.regression_test_slots+' simulated slots');
+ addRow('Regression median absolute residual',decimal(a.regression_median_absolute_residual)+' observed arrivals/hour',decimal(b.regression_median_absolute_residual)+' simulated counts/slot');
+ addRow('Regression baseline residual',decimal(a.regression_baseline_median_absolute_residual)+' observed arrivals/hour',decimal(b.regression_slot_median_baseline_median_absolute_residual)+' simulated counts/slot');
+ addRow('Mean signed residual',decimal(a.regression_mean_residual),decimal(b.regression_mean_signed_residual_actual_minus_predicted));
+ elt('loadStatus').textContent='Loaded from saved model evaluation_metrics.json files.';
+ }catch(error){elt('loadStatus').textContent='Could not load model evidence: '+error.message+'. Check the server static-file mapping for research-evaluation/.';}
+}
+load();
+</script>
+<!-- COMPASS COMPARISON THIRD DATASET START -->
+<script id="compass-third-experiment-comparison">
+(() => {
+  'use strict';
+  const values = {"trainDays":576,"testDays":144,"hourlyTrain":4608,"hourlyTest":1152,"accuracy":"95.14%","baseline":"40.28%","balanced":"94.93%","regMedian":"1.28 simulated arrivals/hour","regBaseline":"5.00 simulated arrivals/hour","regMean":"-0.18"};
+  const heading = 'NEW synthetic 2024-2026 data (separate experiment)';
+  const rowValues = [
+    [/^source$/i, 'Entirely generated synthetic bank-arrival records (2024-2026)'],
+    [/^classification\s+training\s*\/\s*testing$/i, `${values.trainDays} / ${values.testDays} synthetic days`],
+    [/^classification\s+test\s+accuracy$/i, values.accuracy],
+    [/^majority.class\s+baseline$/i, values.baseline],
+    [/^balanced\s+accuracy$/i, values.balanced],
+    [/^regression\s+training\s*\/\s*testing$/i, `${values.hourlyTrain} / ${values.hourlyTest} simulated hours`],
+    [/^regression\s+median\s+absolute\s+residual$/i, values.regMedian],
+    [/^regression\s+baseline\s+residual$/i, values.regBaseline],
+    [/^mean\s+signed\s+residual$/i, values.regMean]
+  ];
+  const normalized = x => (x || '').replace(/\s+/g, ' ').trim();
+
+  function repairTable(table) {
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const header = rows.find(row => {
+      const labels = Array.from(row.cells).map(cell => normalized(cell.textContent).toLowerCase());
+      return labels.some(x => x.includes('observed nigerian data')) &&
+             labels.some(x => x.includes('simulated 2026 data'));
+    });
+    if (!header) return;
+
+    // Existing header might be present already; never append a second one.
+    let th = Array.from(header.cells).find(cell =>
+      cell.classList.contains('compass-third-experiment-cell') ||
+      normalized(cell.textContent).includes('NEW synthetic 2024-2026 data'));
+    if (!th) {
+      th = document.createElement('th');
+      th.scope = 'col';
+      header.appendChild(th);
+    }
+    if (!th.classList.contains('compass-third-experiment-cell')) th.classList.add('compass-third-experiment-cell');
+    if (th.textContent !== heading) th.textContent = heading;
+
+    // Reconcile EVERY render (including rows inserted after the original patch).
+    // Do not skip a table just because its fourth header already exists.
+    for (const row of rows) {
+      if (row === header || !row.cells || row.cells.length < 3) continue;
+      const label = normalized(row.cells[0].textContent);
+      const found = rowValues.find(([pattern]) => pattern.test(label));
+      if (!found) continue;
+      let cell = Array.from(row.cells).find(c => c.classList.contains('compass-third-experiment-cell'));
+      if (!cell && row.cells.length >= 4) cell = row.cells[3];
+      if (!cell) {
+        cell = document.createElement('td');
+        row.appendChild(cell);
+      }
+      if (!cell.classList.contains('compass-third-experiment-cell')) cell.classList.add('compass-third-experiment-cell');
+      if (cell.textContent !== String(found[1])) cell.textContent = String(found[1]);
+    }
+
+    if (!table.closest('.compass-comparison-horizontal-scroll')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'compass-comparison-horizontal-scroll';
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+    const wrapper = table.closest('.compass-comparison-horizontal-scroll');
+    if (wrapper && !(wrapper.nextElementSibling &&
+          wrapper.nextElementSibling.classList.contains('compass-third-experiment-note'))) {
+      const note = document.createElement('p');
+      note.className = 'compass-third-experiment-note';
+      note.textContent = 'Research note: The new 2024-2026 column is a separate synthetic-data experiment. Its high holdout accuracy is not evidence of accuracy on real bank arrivals. Original Nigerian and simulated 2026 scores are preserved.';
+      wrapper.insertAdjacentElement('afterend', note);
+    }
+  }
+
+  function repairAll() {
+    for (const table of document.querySelectorAll('table')) repairTable(table);
+  }
+
+  function boot() {
+    if (!document.getElementById('compass-third-experiment-style')) {
+      const css = document.createElement('style');
+      css.id = 'compass-third-experiment-style';
+      css.textContent = `
+        .compass-comparison-horizontal-scroll { overflow-x: auto; width: 100%; }
+        .compass-comparison-horizontal-scroll > table { min-width: 1120px; width: 100%; }
+        .compass-comparison-horizontal-scroll .compass-third-experiment-cell {
+          background: #f4f8e8; border-bottom: 1px solid #dbe5d9;
+          padding: 12px; min-width: 180px; vertical-align: top;
+        }
+        .compass-comparison-horizontal-scroll th.compass-third-experiment-cell {
+          background: #edf4d5; color: #153b31; font-weight: 700;
+        }
+        .compass-third-experiment-note {
+          font-size: 13px; padding: 12px 14px; margin: 12px 0 18px;
+          background: #f6f7ed; color: #3e534e; line-height: 1.5;
+          border-left: 3px solid #9cba2f;
+        }
+      `;
+      document.head.appendChild(css);
+    }
+    repairAll();
+    // The page loads the old comparison rows asynchronously; repair those too.
+    // Only mutate missing/outdated cells so this observer does not loop forever.
+    const observer = new MutationObserver(() => repairAll());
+    observer.observe(document.body, {childList: true, subtree: true});
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, {once: true});
+  } else {
+    boot();
+  }
+})();
+</script>
+<!-- COMPASS COMPARISON THIRD DATASET END -->
+
+
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body></html>
