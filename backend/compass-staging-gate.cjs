@@ -12,7 +12,7 @@ if (onCloud && !stage) {
 }
 
 const username = String(process.env.COMPASS_STAGING_USERNAME || '');
-const password = String(process.env.COMPASS_STAGING_PASSWORD || '');
+const password = String(process.env.COMPASS_STAGING_PASSWORD_V2 || '');
 if (stage && (username.length < 4 || password.length < 20 || username.includes(':'))) {
   throw new Error('Compass staging diagnostic: ' + JSON.stringify({
     usernameReceived: username.length > 0,
