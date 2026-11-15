@@ -2,6 +2,10 @@
 // Never touches existing appointments. Run against your LOCAL development server only.
 const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
+require('dotenv').config({
+  path: require('path').join(__dirname, '.env'),
+  quiet: true
+});
 const db = require('./db');
 const BASE = process.env.TEST_BASE_URL || 'http://localhost:3000';
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+\/?$/.test(BASE)) {
@@ -23,7 +27,7 @@ const capacity = async (date, time) => {
 };
 (async () => {
   let date, slot;
-  for (let day=3; day<=30 && !slot; day++) {
+  for (let day=3; day<=13 && !slot; day++) {
     const d=dateInManila(day);
     const r=await fetch(BASE+'/api/booking-availability?date='+d);
     if (!r.ok) throw Error('Availability HTTP '+r.status);
@@ -31,23 +35,23 @@ const capacity = async (date, time) => {
     const candidate=(b.available_slots||[]).find(s=>s.remaining_capacity>0);
     if (candidate) {date=d;slot=candidate;}
   }
-  if (!slot) throw Error('No available future slot within 30 days; no appointment created.');
+  if (!slot) throw Error('No available future slot within 14 days; no appointment created.');
   const time=slot.time;
-  const [services]=await db.query('SELECT service_id FROM services WHERE is_active=1 ORDER BY service_id LIMIT 1');
+  const [services]=await db.query(`SELECT service_id FROM services WHERE is_active=1 AND service_name='Savings Account Opening' LIMIT 1`);
   if (!services.length) throw Error('No active services; no appointment created.');
   const before=await capacity(date,time);
   const contact='lifecycle-'+randomUUID().slice(0,12)+'@example.com';
-  const created=await api('/api/appointments',{full_name:'Automated Lifecycle Test',email:contact,phone_number:'09170000000',appointment_date:date,appointment_time:time,service_ids:[services[0].service_id],customer_notes:'Automated disposable test; no real account details'});
+  const created=await api('/api/appointments',{full_name:'Automated Lifecycle Test',email:contact,phone_number:'09170000000',appointment_date:date,appointment_time:time,service_ids:[services[0].service_id],customer_notes:'Account Service: Savings Account Opening'});
   assert.equal(created.code,201,'Create failed: '+JSON.stringify(created.body));
   const ref=created.body.appointment.reference_number;
-  console.log('PASS create temporary pending appointment:',ref,date,time);
+  console.log('PASS create temporary confirmed appointment:',ref,date,time);
   try {
     const after=await capacity(date,time);
     assert.equal(after,before+1,'Active slot count should increase by 1');
     console.log('PASS active slot count increased');
     const lookup=await api('/api/appointments/lookup',{reference_number:ref,contact});
     assert.equal(lookup.code,200,'Lookup failed: '+JSON.stringify(lookup.body));
-    assert.equal(lookup.body.appointment.status,'pending');
+    assert.equal(lookup.body.appointment.status,'confirmed');
     console.log('PASS lookup with correct contact');
     const denied=await api('/api/appointments/lookup',{reference_number:ref,contact:'wrong@example.com'});
     assert.equal(denied.code,404,'Incorrect contact should not find booking');
@@ -59,7 +63,7 @@ const capacity = async (date, time) => {
     assert.equal(rows[0].status,'cancelled');
     const [history]=await db.query("SELECT old_status,new_status FROM appointment_status_history WHERE appointment_id=? AND new_status='cancelled'",[rows[0].appointment_id]);
     assert.equal(history.length,1);
-    assert.equal(history[0].old_status,'pending');
+    assert.equal(history[0].old_status,'confirmed');
     console.log('PASS MySQL cancellation and history');
     assert.equal(await capacity(date,time),before,'Cancelled booking must release capacity');
     console.log('PASS slot capacity restored');
@@ -68,7 +72,7 @@ const capacity = async (date, time) => {
     console.log('PASS repeat cancellation rejected');
     console.log('7/7 lifecycle checks passed. Test booking retained with cancelled status for audit history.');
   } catch(err) {
-    console.error('TEST FAILED for temporary booking',ref,'— may still be pending. Cancel manually if needed.');
+    console.error('TEST FAILED for temporary booking',ref,'— may still be confirmed. Cancel manually if needed.');
     throw err;
   }
 })().catch(e=>{console.error('FAIL:',e.message);process.exitCode=1;}).finally(()=>db.end());

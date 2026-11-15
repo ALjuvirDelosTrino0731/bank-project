@@ -1,0 +1,31 @@
+/* COMPASS_ADMIN_V4: additive UI guidance and larger readable graphs */
+.ca4-guide{padding:15px 18px;margin:12px 0 20px;border:1px solid #d7dce3;border-left:4px solid #849bb0;border-radius:16px;background:#fff;color:#253142;font:13px/1.6 Inter,Arial,sans-serif}
+.ca4-guide strong{font-size:14px;color:#172238}.ca4-guide p{margin:5px 0 0;color:#546273}
+.ca4-explain{font:13px/1.65 Inter,Arial,sans-serif;color:#304154;padding:13px 16px;margin:12px 0 0;background:#f5f7fa;border:1px solid #e5e9ef;border-radius:12px}
+#section-traffic .es14-plots{display:grid!important;grid-template-columns:1fr!important;gap:26px!important}
+#section-traffic .es14-plots figure{margin:0;background:#fff;padding:15px;border-radius:18px;min-width:0}
+#section-traffic .es14-plots img{max-width:100%!important;width:100%!important;height:auto!important;object-fit:contain}
+#section-traffic .es14-panel{max-width:none!important}
+#section-traffic .es14-rows{gap:12px!important}
+#section-traffic .es14-row{grid-template-columns:68px minmax(100px,1fr) 66px!important;font-size:14px!important}
+#section-traffic .es14-track{height:18px!important}
+#section-traffic .ca4-large-graph-grid{grid-template-columns:minmax(0,1fr)!important}
+#section-traffic #transactionPieChart,#section-traffic #capacityBarChart{max-width:100%!important}
+#section-traffic .ca4-large-graph-grid .h-64{height:360px!important}
+.ca4-calendar-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.ca4-calendar-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.ca4-calendar-day{display:block}
+.ca4-weekday{text-align:center;color:#637181;font:700 12px Inter,Arial,sans-serif;padding:10px}
+.ca4-date{background:#fff;border:1px solid #dce2e9;border-radius:14px;padding:12px;min-width:0;min-height:110px;display:flex;flex-direction:column;gap:8px}
+.ca4-date.ca4-weekend{background:#f8f9fa;color:#6b7785}
+.ca4-calendar-day .ca4-date{min-height:200px}
+.ca4-date-button{width:fit-content;padding:5px 9px;border-radius:9px;background:#f3f5f8;color:#1f2937;font:800 14px Inter,Arial,sans-serif;border:0;cursor:pointer}
+.ca4-date-button:hover{background:#e2e6f4}
+.ca4-count{font:700 12px Inter,Arial,sans-serif;color:#62408a}
+.ca4-event{width:100%;display:block;text-align:left;overflow-wrap:anywhere;background:#f5f2fb;border:1px solid #e5daef;border-radius:8px;padding:7px;font:11px/1.5 Inter,Arial,sans-serif;color:#4c2974;cursor:pointer}
+.ca4-event:hover{background:#ece3f5}.ca4-hours{display:grid;gap:10px;margin-top:10px}
+.ca4-hour{border:1px solid #e4e9ef;background:#fbfcfd;border-radius:12px;padding:13px;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.ca4-hour strong{font-size:13px}.ca4-hour .ca4-event{flex-basis:100%;font-size:12px}
+.ca4-calendar-week .ca4-date{min-height:150px}
+@media(max-width:960px){.ca4-calendar-week{grid-template-columns:repeat(2,minmax(0,1fr))}.ca4-calendar-month{gap:4px}.ca4-date{padding:6px;min-height:75px}.ca4-event{font-size:9px}}
+@media(max-width:560px){.ca4-calendar-week{grid-template-columns:1fr}.ca4-calendar-month{grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.ca4-date{padding:3px;min-height:58px;border-radius:6px}.ca4-count{font-size:9px}.ca4-event{display:none}.ca4-weekday{font-size:9px}}

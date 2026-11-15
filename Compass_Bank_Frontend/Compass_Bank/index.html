@@ -28,6 +28,20 @@
   </script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/unified-calendar.css">
+<style id="compass-form-validation-styles">
+#modalRefCode, #modalEmail, #modalContact,
+#modalTransactionsList, #bookingWarningMessage {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+#successModal > div {
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+</style>
+  <link rel="stylesheet" href="css/compass-calendar-traffic.css">
+
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col justify-between">
 
@@ -106,8 +120,8 @@
                 </svg>
               </div>
               <div>
-                <h4 class="font-serif font-bold text-lg text-black">Edit an appointment</h4>
-                <p class="text-xs md:text-sm text-gray-600 font-sans mt-0.5">Modify date, time, or transaction items</p>
+                <h4 class="font-serif font-bold text-lg text-black">View appointment status</h4>
+                <p class="text-xs md:text-sm text-gray-600 font-sans mt-0.5">Check your scheduled date, time, and current status</p>
               </div>
             </div>
             <span class="text-2xl text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
@@ -151,7 +165,7 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label for="email" class="sm:col-span-5 font-serif font-bold text-base md:text-lg text-black">Email address</label>
-                <div class="sm:col-span-7"><input type="text" id="email" required inputmode="email" autocomplete="email" data-gmail-only placeholder="name@gmail.com" pattern="[A-Za-z0-9._%+\-]+@[Gg][Mm][Aa][Ii][Ll]\.[Cc][Oo][Mm]" title="Please enter a valid Gmail address (e.g. name@gmail.com)" class="pill-input w-full bg-white text-gray-800 px-5 py-3 text-base border-none font-sans font-medium"></div>
+                <div class="sm:col-span-7"><input type="email" id="email" required maxlength="254" inputmode="email" autocomplete="email" placeholder="name@example.com" title="Enter a valid email address from any provider" class="pill-input w-full bg-white text-gray-800 px-5 py-3 text-base border-none font-sans font-medium"></div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label for="contactNumber" class="sm:col-span-5 font-serif font-bold text-base md:text-lg text-black">Contact Number:</label>
@@ -168,12 +182,7 @@
                       <button type="button" data-booking-view="day" aria-pressed="false">Day</button>
                     </div>
                   </div>
-                  <div class="unified-cal-source">
-                    <label for="scenarioBank">Experimental research bank
-                      <select id="scenarioBank"><option value="first">First observed bank</option><option value="second">Second observed bank</option><option value="third">Third observed bank</option></select>
-                    </label>
-                    <span>Traffic estimates use external Nigerian bank observations; not validated Philippine-branch forecasts.</span>
-                  </div>
+
                   <div id="trafficCalendar"></div>
                   <div id="bookingDayHours" aria-live="polite"></div>
                 </div>
@@ -183,7 +192,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label for="appointmentTime" class="sm:col-span-5 font-serif font-bold text-base md:text-lg text-black">Appointment Time</label>
                 <div class="sm:col-span-7 relative">
-                  <select id="appointmentTime" required class="pill-input w-full bg-white text-gray-800 px-5 py-3 pr-10 text-base border-none font-sans font-medium appearance-none cursor-pointer">
+                  <select id="appointmentTime" aria-hidden="true" tabindex="-1" class="pill-input w-full bg-white text-gray-800 px-5 py-3 pr-10 text-base border-none font-sans font-medium appearance-none cursor-pointer">
                     <option value="" selected disabled>Select a time from the calendar</option>
                     <option value="9:00 AM – 10:00 AM">9:00 AM – 10:00 AM</option>
                     <option value="10:00 AM – 11:00 AM">10:00 AM – 11:00 AM</option>
@@ -233,7 +242,7 @@
         <h3 id="lookupModalTitle" class="font-serif font-bold text-2xl text-gray-900">Lookup Appointment</h3>
         <button onclick="closeLookupModal()" class="text-gray-400 hover:text-black font-bold text-xl">✕</button>
       </div>
-      <p class="text-gray-600 text-sm mb-6">Enter your reference code and contact details to manage your existing reservation.</p>
+      <p class="text-gray-600 text-sm mb-6">Enter your reference code and registered contact details to view or cancel your reservation.</p>
       <form onsubmit="handleLookupSubmit(event)" class="space-y-4">
         <div>
           <label for="lookupRef" class="block font-serif font-bold text-sm text-gray-800 mb-1">Reference Code</label>
@@ -268,6 +277,7 @@
         <div class="w-16 h-16 bg-brandLime text-black rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">✓</div>
         <h3 id="modalHeaderTitle" class="font-serif font-bold text-2xl text-gray-900 mb-1">Appointment Confirmed!</h3>
         <p id="modalHeaderSub" class="text-gray-600 text-sm mb-4">Your appointment details are saved below.</p>
+        <p id="compassEmailSpamNotice" class="text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2 text-xs mb-3">Check your email Inbox and Spam/Junk folder for a confirmation message. Keep the QR code and reference shown here even if email delivery is delayed.</p>
         <div class="bg-brandLime/30 border border-brandLimeDark rounded-xl p-3 mb-6 inline-block">
           <span class="text-xs text-gray-600 block uppercase font-bold tracking-wider">Reference Code</span>
           <span id="modalRefCode" class="text-xl font-mono font-bold text-black"></span>
@@ -283,10 +293,290 @@
     </div>
   </div>
 
-  <script src="js/transactions.js"></script>
+  <script id="compass-customer-name-validation">
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('appointmentForm');
+
+  form.addEventListener('submit', event => {
+    const fields = [
+      document.getElementById('customerFullName'),
+      ...document.querySelectorAll('[id^="payee_"], [id^="company_"]')
+    ];
+
+    for (const field of fields) {
+      if (!field) continue;
+
+      const name = field.value.trim();
+
+      if (!/\p{L}/u.test(name) || name.length > 150) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        field.setCustomValidity(
+          'Enter a name containing letters, up to 150 characters.'
+        );
+        field.reportValidity();
+        return;
+      }
+
+      field.setCustomValidity('');
+    }
+  }, true);
+
+  document.addEventListener('input', event => {
+    const field = event.target;
+
+    if (field.matches?.(
+      '#customerFullName, [id^="payee_"], [id^="company_"]'
+    )) {
+      if (field.id !== 'customerFullName') {
+        field.value = field.value.slice(0, 150);
+      }
+      field.setCustomValidity('');
+    }
+  });
+});
+</script>
+<script src="js/transactions.js"></script>
   <script src="js/appointment.js"></script>
   <script src="js/main.js"></script>
   <script src="js/calendar.js"></script>
-  
+  <script src="js/compass-calendar-traffic.js"></script>
+
+<script id="compass-name-feedback-v2">
+document.addEventListener('DOMContentLoaded', () => {
+  const selector =
+    '#customerFullName, [id^="payee_"], [id^="company_"]';
+
+  function validateName(field, showError) {
+    const value = field.value.trim();
+    const hasLetter = /\p{L}/u.test(value);
+
+    let message = '';
+
+    if (value && !hasLetter) {
+      message = 'This field must contain letters, not only numbers.';
+    } else if (value.length > 150) {
+      message = 'Maximum of 150 characters allowed.';
+    }
+
+    field.setCustomValidity(message);
+
+    if (showError && message) {
+      field.reportValidity();
+    }
+
+    return !message;
+  }
+
+  document.addEventListener('focusout', event => {
+    const field = event.target;
+
+    if (field.matches?.(selector)) {
+      validateName(field, true);
+    }
+  });
+
+  document.addEventListener('input', event => {
+    const field = event.target;
+
+    if (field.matches?.(selector)) {
+      field.setCustomValidity('');
+    }
+  });
+
+  const form = document.getElementById('appointmentForm');
+
+  if (form) {
+    form.addEventListener('submit', event => {
+      const fields = [...document.querySelectorAll(selector)];
+      const invalid = fields.find(field => !validateName(field, false));
+
+      if (invalid) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        invalid.reportValidity();
+      }
+    }, true);
+  }
+});
+</script>
+
+
+<script id="COMPASS_DIRECT_CONFIRM_2026">
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('appointmentForm');
+  const submit = document.getElementById('submitBtn');
+  if (!form || !submit) return;
+
+  submit.textContent = 'Review Appointment Details';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'compassReviewOverlay';
+  overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:10000;background:#07101dc9;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px';
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true" aria-labelledby="reviewTitle"
+         style="background:white;color:#182235;width:min(100%,520px);max-height:90vh;overflow-y:auto;padding:26px;border-radius:22px;box-shadow:0 24px 80px #0007;font-family:Arial,sans-serif">
+      <h2 id="reviewTitle" style="font-size:24px;font-weight:800;margin:0 0 10px">Confirm your appointment</h2>
+      <p>No appointment has been submitted yet. Please check these details:</p>
+      <pre id="reviewDetails" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f5f7;padding:16px;border-radius:12px;font:14px/1.7 Arial,sans-serif"></pre>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button type="button" id="reviewEdit" style="flex:1;border:0;padding:14px;border-radius:12px;background:#e5e7eb;font-weight:bold">Edit Details</button>
+        <button type="button" id="reviewConfirm" style="flex:1;border:0;padding:14px;border-radius:12px;background:#7747ab;color:white;font-weight:bold">Submit Appointment</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  const edit = document.getElementById('reviewEdit');
+  const confirm = document.getElementById('reviewConfirm');
+  let approved = false;
+
+  function close() {
+    overlay.style.display = 'none';
+    submit.focus();
+  }
+
+  edit.addEventListener('click', close);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.style.display === 'flex') close();
+  });
+
+  document.addEventListener('submit', e => {
+    if (e.target !== form || approved) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    if (submit.disabled || !form.reportValidity()) return;
+
+    const val = id => document.getElementById(id)?.value?.trim() || '';
+
+    if (!val('appointmentDate') || !val('appointmentTime')) {
+      alert('Select a date and time first.');
+      return;
+    }
+
+    const cards = [...document.querySelectorAll('#transactionsContainer > *')];
+    if (!cards.length) {
+      alert('Add at least one transaction.');
+      return;
+    }
+
+    const items = [];
+
+    for (const card of cards) {
+      const id = card.id.split('_')[1];
+      if (typeof buildTransactionDescription !== 'function') {
+        alert('Transaction details are not ready.');
+        return;
+      }
+      const desc = buildTransactionDescription(id);
+      if (desc === null) return;
+      items.push(desc);
+    }
+
+    const details =
+      'Name: ' + val('customerFullName') +
+      '\nEmail: ' + val('email') +
+      '\nPhone: ' + val('contactNumber') +
+      '\nDate: ' + val('appointmentDate') +
+      '\nTime: ' + val('appointmentTime') +
+      '\n\nTransactions:\n- ' + items.join('\n- ');
+
+    document.getElementById('reviewDetails').textContent = details;
+    overlay.style.display = 'flex';
+    edit.focus();
+  }, true);
+
+  confirm.addEventListener('click', () => {
+    if (overlay.style.display !== 'flex' || confirm.disabled) return;
+    close();
+    approved = true;
+    try {
+      form.requestSubmit(submit);
+    } finally {
+      approved = false;
+    }
+  });
+});
+</script>
+<script id="compass-customer-illustration-notice-remover">
+(function () {
+  'use strict';
+  if (window.CompassCustomerIllustrationRemoval?.installed) return;
+  const anchor = /research\s+illustration\s+only\s*:/i;
+  const detailA = /top\s+third/i;
+  const detailB = /clock\s+times/i;
+  let removed = 0;
+  let scheduled = false;
+
+  function normalized(text) {
+    return String(text || '').replace(/\s+/g, ' ').trim();
+  }
+  function isExactNotice(text) {
+    const value = normalized(text);
+    return anchor.test(value) && detailA.test(value) && detailB.test(value);
+  }
+
+  function chooseNoticeContainer(start) {
+    let chosen = start;
+    let parent = start.parentElement;
+    while (parent && parent !== document.body && parent !== document.documentElement) {
+      const text = normalized(parent.textContent);
+      if (!isExactNotice(text) || text.length > 850 ||
+          !/^\*?\s*research\s+illustration\s+only\s*:/i.test(text) ||
+          parent.querySelector('form, input, button, nav, table')) break;
+      if (parent.matches('p,div,aside,blockquote,section')) chosen = parent;
+      parent = parent.parentElement;
+    }
+    return chosen;
+  }
+
+  function removeMatchingNotice() {
+    if (!document.body) return;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const candidates = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (anchor.test(node.nodeValue || '')) candidates.push(node);
+    }
+    for (const textNode of candidates) {
+      let element = textNode.parentElement;
+      while (element && element !== document.body &&
+             !isExactNotice(element.textContent)) element = element.parentElement;
+      if (!element || element === document.body) continue;
+      const target = chooseNoticeContainer(element);
+      if (target && target.isConnected) {
+        target.remove();
+        removed += 1;
+      }
+    }
+  }
+
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    queueMicrotask(() => { scheduled = false; removeMatchingNotice(); });
+  }
+
+  const api = {
+    installed: true,
+    get removedCount() { return removed; },
+    run: removeMatchingNotice
+  };
+  window.CompassCustomerIllustrationRemoval = api;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', removeMatchingNotice, { once: true });
+  } else {
+    removeMatchingNotice();
+  }
+  const observer = new MutationObserver(schedule);
+  observer.observe(document.documentElement, {
+    subtree: true, childList: true, characterData: true
+  });
+})();
+</script>
 </body>
 </html>

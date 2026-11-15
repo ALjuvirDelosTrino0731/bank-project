@@ -32,3 +32,37 @@ backend/data/uploads/
 # OS / IDE
 .DS_Store
 Thumbs.db
+
+# Compass Bank local ML research evidence
+/ml/hourly_observed_counts.csv
+/ml/real_scenarios.json
+/ml/diagnostics/
+/ml-models/
+/admin bank/admin bank/compass-bank-admin-updated/research-evaluation/
+
+# Local development backups
+*.bak
+*.before-consolidation-*
+*.demo-backup-*
+*.sidebar-backup-*
+/step27*-backup-*/
+/compass-research-*-backup-*/
+/backend/.compass-security/
+
+# Compass deployment safety defaults
+**/.compass-security/
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+**/*.pem
+**/*.p12
+**/*.pfx
+**/*.key
+deployment-prep/
+*.log.*
+ml-models/**/private/
+ml-models/**/secrets/
+
+# Compass Bank local secrets
+backend/.env
+backend/.env.*

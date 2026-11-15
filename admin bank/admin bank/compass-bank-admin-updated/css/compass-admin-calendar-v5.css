@@ -1,0 +1,46 @@
+/* Scoped admin calendar v5. Independent from customer booking rules and stored records. */
+#section-calendar .cav5-tools{background:#fff;border:1px solid #dbe2e9;border-radius:18px;padding:15px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:end;box-shadow:0 5px 17px rgba(14,24,42,.04)}
+#section-calendar .cav5-field{display:flex;flex-direction:column;gap:5px;font:700 12px/1.35 Inter,Arial,sans-serif;color:#344257;min-width:170px}
+#section-calendar .cav5-field input{border:1px solid #cdd4df;border-radius:10px;padding:9px 11px;background:#fff;color:#1e293b;max-width:260px;font:13px Inter,Arial,sans-serif}
+#section-calendar .cav5-field:has(input[type=search]){flex:1;min-width:200px}
+#section-calendar .cav5-field input[type=search]{max-width:none}
+#section-calendar .cav5-action{padding:10px 14px;border-radius:11px;border:1px solid #7443ab;background:#7947b3;color:white;cursor:pointer;font:700 12px Inter,Arial,sans-serif}
+#section-calendar .cav5-action:hover{background:#5e318c}#section-calendar .cav5-action:disabled{opacity:.5;cursor:wait}
+#section-calendar .cav5-secondary{background:#f8f5fc;color:#5a2b90;border-color:#dcd2e8}#section-calendar .cav5-secondary:hover{background:#ebe0f8}
+#section-calendar .cav5-toggle{display:flex;align-items:center;gap:8px;font:700 12px Inter,Arial,sans-serif;color:#304054;padding:10px 2px;cursor:pointer}
+#section-calendar .cav5-toggle input{width:16px;height:16px;accent-color:#7947b3}
+#section-calendar .cav5-legend{flex-basis:100%;display:flex;gap:12px 20px;flex-wrap:wrap;align-items:center;padding:11px 1px 3px;font:700 12px Inter,Arial,sans-serif;color:#3f4a60}
+#section-calendar .cav5-legend>span{display:inline-flex;align-items:center;gap:6px}
+#section-calendar .cav5-dot{display:inline-block;width:12px;height:12px;border-radius:4px;border:1px solid rgba(0,0,0,.18)}
+#section-calendar .cav5-low{background:#adf0c8}#section-calendar .cav5-moderate{background:#fff0a3}#section-calendar .cav5-high{background:#ffc6c6}
+#section-calendar .cav5-closed{background:#eaedf2}#section-calendar .cav5-approved{background:#7947b3}
+#section-calendar .cav5-status{flex-basis:100%;font:12px/1.55 Inter,Arial,sans-serif;color:#596579;margin:0}
+#section-calendar .cav5-old-legend{font:700 12px Inter,Arial,sans-serif;color:#573382}
+#section-calendar .cav5-legend-approved{color:#573382}
+#section-calendar .ca4-date{transition:border-color .12s,box-shadow .12s,background-color .2s}
+#section-calendar .ca4-date.cav5-traffic-low{background:#dff9e8!important;border-color:#2caa60!important}
+#section-calendar .ca4-date.cav5-traffic-moderate{background:#fff6c8!important;border-color:#dba800!important}
+#section-calendar .ca4-date.cav5-traffic-high{background:#ffe5e5!important;border-color:#df5252!important}
+#section-calendar .ca4-date.cav5-closed,#section-calendar .ca4-date.cav5-outside{background:#f1f3f6!important;border-color:#d0d6de!important}
+#section-calendar .ca4-date.cav5-unavailable{background:#fff!important;border-style:dashed!important}
+#section-calendar .ca4-date:focus-within{outline:3px solid #7950ae;outline-offset:2px}
+#section-calendar .cav5-traffic-label{font:700 10px/1.35 Inter,Arial,sans-serif;color:#3b4758;overflow-wrap:anywhere;display:block;margin-top:auto}
+#section-calendar .cav5-no-search-match{opacity:.48}
+#section-calendar .cav5-match-note{font:700 10px/1.3 Inter,Arial,sans-serif;color:#42336a;overflow-wrap:anywhere}
+#section-calendar .cav5-search-summary{font:12px Inter,Arial,sans-serif;color:#4b5563;margin-top:6px}
+#section-calendar .ca4-event[hidden]{display:none!important}
+#section-calendar .cav5-detail{background:#fff;border:1px solid #dce4eb;border-radius:18px;padding:18px;margin-top:14px;box-shadow:0 6px 22px rgba(28,36,50,.05)}
+#section-calendar .cav5-detail h3{font:800 19px Georgia,serif;color:#16233a;margin:0 0 8px}
+#section-calendar .cav5-detail h4{font:800 17px Georgia,serif;color:#37225c;margin:12px 0 7px}
+#section-calendar .cav5-detail p{font:13px/1.55 Inter,Arial,sans-serif;color:#445166;margin:5px 0}
+#section-calendar .cav5-availability{background:#f2f6fc;padding:9px 12px;border-radius:10px}
+#section-calendar .cav5-loading{font-style:italic;color:#667085}
+#section-calendar .cav5-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;margin:12px 0 14px}
+#section-calendar .cav5-bar-row{display:grid;grid-template-columns:55px minmax(50px,1fr) 48px;gap:10px;align-items:center;font:700 12px Inter,Arial,sans-serif;color:#334155}
+#section-calendar .cav5-bar-row strong{text-align:right;font-variant-numeric:tabular-nums}
+#section-calendar .cav5-track{height:18px;background:#eee5f7;border-radius:8px;overflow:hidden}
+#section-calendar .cav5-fill{height:100%;background:#8f5bc6;min-width:2px;border-radius:8px}
+#section-calendar .cav5-detail p.cav5-meaning{padding:12px 14px;background:#fff7e3;border-left:3px solid #c9a029;border-radius:8px;color:#493c24;font-weight:600}
+#section-calendar .cav5-hour-note{flex-basis:100%;font:700 11px/1.45 Inter,Arial,sans-serif!important;color:#573b85!important;background:#f5effc;border-radius:7px;padding:7px 10px;margin:0!important}
+@media(max-width:900px){#section-calendar .cav5-bars{grid-template-columns:1fr}}
+@media(max-width:580px){#section-calendar .cav5-tools{padding:12px}#section-calendar .cav5-field{width:100%}#section-calendar .cav5-field input{width:100%;max-width:100%}#section-calendar .cav5-traffic-label{font-size:8px}#section-calendar .cav5-bar-row{font-size:11px}}

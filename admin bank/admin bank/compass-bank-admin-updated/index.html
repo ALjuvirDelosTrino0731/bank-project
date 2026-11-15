@@ -23,6 +23,75 @@
   <!-- Application JavaScript -->
   <script src="js/app.js" defer></script>
   <link rel="stylesheet" href="css/unified-calendar.css">
+
+<style id="compass-sidebar-alignment-v1">
+/* COMPASS_SIDEBAR_ALIGNMENT_V1 — styling only, no JavaScript behavior changes */
+#sidebar button[data-research-module] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  min-height: 44px;
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  white-space: normal !important;
+}
+#sidebar button[data-research-module] > svg {
+  display: block !important;
+  flex: 0 0 1.25rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  margin: 0 !important;
+  align-self: center !important;
+}
+#sidebar button[data-research-module] > span {
+  display: block !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  line-height: 1.35 !important;
+}
+</style>
+<style id="compass-appointment-text-wrap">
+#detailRefCode, #detailEmail, #detailContact,
+#detailTransactionsList, #detailAccountNumber,
+#detailCheckNumber {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+#detailsModal > div {
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+#detailTransactionsList * {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+</style>
+<link rel="stylesheet" href="css/compass-admin-v4.css">
+<link rel="stylesheet" href="css/compass-admin-calendar-v5.css">
+<style id="COMPASS_QR_PRIVACY_2026">
+#compassQrScannerDialog {
+  background:rgba(8,14,26,.84)!important;
+  backdrop-filter:blur(18px)!important;
+  -webkit-backdrop-filter:blur(18px)!important;
+}
+#compassQrScannerDialog>div {
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+</style>
+<style id="compass-ml-sidebar-layout-v2">
+#sidebar button[data-research-module="evaluation"] {display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:.75rem!important;text-align:left!important;min-height:48px!important;padding:12px 16px!important}
+#sidebar button[data-research-module="evaluation"] > svg {width:20px!important;height:20px!important;flex:0 0 20px!important;margin:0!important}
+#sidebar button[data-research-module="evaluation"] > span {flex:1!important;min-width:0!important;margin:0!important;line-height:1.35!important}
+</style>
+
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
 </head>
 <body>
 <!-- TOAST NOTIFICATION SYSTEM -->
@@ -170,9 +239,9 @@
             <span>Calendar</span>
           </button>
 
-          <a href="dataset.html" target="_blank" rel="noopener" class="block px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100">Dataset Intelligence</a>
-          <a href="traffic-scenarios.html" target="_blank" rel="noopener" class="block px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100">Traffic Scenarios · Month / Week / Day</a>
-          <a href="evaluation.html" target="_blank" rel="noopener" class="block px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100">Real-data ML Evaluation</a>
+          <button type="button" data-research-module="dataset" onclick="openResearchModule('dataset')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><ellipse cx="12" cy="7" rx="7" ry="2.2"/><path d="M5 7v5c0 1.2 3.1 2.2 7 2.2s7-1 7-2.2V7M5 12v5c0 1.2 3.1 2.2 7 2.2s7-1 7-2.2v-5"/></svg><span>Dataset Intelligence</span></button>
+          <button type="button" data-research-module="scenarios" onclick="openResearchModule('scenarios')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/><circle cx="19" cy="6" r="1"/></svg><span>Archived Nigerian Scenarios</span></button>
+<button type="button" data-research-module="evaluation" onclick="openResearchModule('evaluation')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 16v-3m5 3V8m5 8v-5"/></svg><span>ML Evaluation</span></button>
 
           <button id="nav-traffic" onclick="switchNavTab('traffic')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
@@ -185,6 +254,21 @@
       <!-- MAIN CONTENT CONTAINER -->
       <main class="flex-grow p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-8">
 
+        <!-- COMPASS_UNIFIED_RESEARCH_DEMO -->
+        <section id="section-research" class="hidden space-y-5" aria-label="Research module">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Dataset intelligence / Research models</p>
+              <h2 id="researchModuleTitle" class="font-serif font-black text-2xl md:text-3xl text-gray-900">Research module</h2>
+              <p id="researchModuleSubtitle" class="text-sm text-gray-600">Experimental research tools and results</p>
+            </div>
+            <button type="button" onclick="switchNavTab('dashboard')" class="self-start rounded-xl border border-gray-300 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">Back to dashboard</button>
+          </div>
+          <div class="bg-transparent rounded-3xl overflow-hidden">
+            <iframe id="researchModuleFrame" title="Compass Bank research module" class="block w-full border-0" style="height: min(75vh, 860px); min-height: 560px;" loading="eager"></iframe>
+          </div>
+          <p class="text-xs text-gray-500">Research-only tools. Experimental Nigerian data are not validated live Philippine branch forecasts.</p>
+        </section>
         <!-- ================= SECTION 1: DASHBOARD OVERVIEW ================= -->
         <section id="section-dashboard" class="space-y-8">
           <!-- Welcome Bar -->
@@ -261,7 +345,7 @@
                   </div>
                   <h3 class="font-serif font-bold text-xl text-black mt-1">Loading forecast...</h3>
                   <p class="text-xs md:text-sm text-gray-900 font-sans mt-1">
-                    Model demonstration trained on synthetic data; not actual bank measurements.
+                    No validated Philippine future-date traffic forecast is available. Experimental Random Forest predictions can be viewed under Experimental ML Scenarios.
                   </p>
                 </div>
               </div>
@@ -277,11 +361,11 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-serif font-bold text-xl text-gray-900">Hourly Customer Traffic Prediction</h3>
-                <p class="text-xs text-gray-500">Synthetic-model forecast for branch hours (9:00 AM - 5:00 PM); no actual arrival data</p>
+                <p class="text-xs text-gray-500">No validated hourly forecast for Philippine branch dates. Research predictions are available in Experimental ML Scenarios.</p>
               </div>
               <div class="flex items-center space-x-4 text-xs font-semibold">
-                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandPurple inline-block"></span><span>Predicted Traffic</span></span>
-                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandLimeDark inline-block"></span><span>No actual visits available</span></span>
+                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandPurple inline-block"></span><span>Operational Forecast</span></span>
+                <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-brandLimeDark inline-block"></span><span>Verified arrivals tracked separately</span></span>
               </div>
             </div>
             <div class="relative h-64 md:h-72 w-full">
@@ -326,25 +410,39 @@
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 class="font-serif font-black text-2xl md:text-3xl text-gray-900">Appointments Management</h2>
-              <p class="text-gray-600 text-sm font-sans mt-1">Review, approve, reject, or filter customer branch reservations.</p>
+              <p class="text-gray-600 text-sm font-sans mt-1">View confirmed reservations and sort by date, customer name, or service. Historical appointment records remain in the database.</p>
             </div>
           </div>
 
           <!-- Filter Controls Bar -->
           <div class="bg-white rounded-3xl p-4 border border-gray-200 card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <!-- Filter Tabs -->
-            <div class="flex items-center space-x-1 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-              <button onclick="setAppointmentFilter('All')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold transition-all bg-brandPurple text-white">All (<span id="countAll">0</span>)</button>
-              <button onclick="setAppointmentFilter('Pending')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Pending (<span id="countPending">0</span>)</button>
-              <button onclick="setAppointmentFilter('Approved')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Approved (<span id="countApproved">0</span>)</button>
-              <button onclick="setAppointmentFilter('Cancelled')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Cancelled (<span id="countRejected">0</span>)</button>
-              <button onclick="setAppointmentFilter('Completed')" class="app-filter-btn px-4 py-2 rounded-full text-xs font-serif font-bold text-gray-600 hover:bg-gray-100 transition-all">Completed (<span id="countCompleted">0</span>)</button>
+            <!-- Filter Tabs: COMPASS_APPROVED_SORT_V1 -->
+            <div class="flex items-center gap-2">
+              <span class="inline-flex rounded-full px-4 py-2 text-xs font-bold bg-brandPurple text-white">
+                Approved appointments (<span id="countApproved">0</span>)
+              </span>
+              <div class="hidden" aria-hidden="true">
+                <span id="countAll">0</span><span id="countPending">0</span>
+                <span id="countRejected">0</span><span id="countCompleted">0</span>
+              </div>
             </div>
 
-            <!-- Search Field -->
-            <div class="relative w-full md:w-64">
-              <input type="text" id="appointmentSearchInput" onkeyup="renderAppointmentsTable()" placeholder="Search Ref or Account #..." class="pill-input w-full bg-gray-50 text-gray-900 pl-10 pr-4 py-2 text-xs border border-gray-200">
-              <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+              <div class="relative w-full sm:w-56">
+                <label for="appointmentSearchInput" class="block text-xs font-bold mb-1 text-gray-600">Find appointment</label>
+                <input type="text" id="appointmentSearchInput" oninput="renderAppointmentsTable()" placeholder="Name, reference or service" class="pill-input w-full bg-gray-50 text-gray-900 px-3 py-2 text-xs border border-gray-200">
+              </div>
+              <div class="w-full sm:w-52">
+                <label for="appointmentSort" class="block text-xs font-bold mb-1 text-gray-600">Sort appointments by</label>
+                <select id="appointmentSort" onchange="setAppointmentSort(this.value)" class="w-full rounded-xl px-3 py-2 text-xs border border-gray-200 bg-white text-gray-900" aria-label="Sort approved appointments">
+                  <option value="dateAsc">Date 鈥?earliest first</option>
+                  <option value="dateDesc">Date 鈥?latest first</option>
+                  <option value="nameAsc">Customer name 鈥?A to Z</option>
+                  <option value="nameDesc">Customer name 鈥?Z to A</option>
+                  <option value="serviceAsc">Service type 鈥?A to Z</option>
+                  <option value="serviceDesc">Service type 鈥?Z to A</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -355,7 +453,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider font-semibold">
                   <tr>
                     <th class="px-6 py-4">Ref Code</th>
-                    <th class="px-6 py-4">Account Number</th>
+                    <th class="px-6 py-4">Customer Name</th>
                     <th class="px-6 py-4">Date & Time Slot</th>
                     <th class="px-6 py-4">Transaction Service</th>
                     <th class="px-6 py-4">Amount</th>
@@ -412,15 +510,10 @@
           </div>
           <div class="bg-white rounded-3xl border border-gray-200 p-4 sm:p-5 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <div><h3 class="font-serif font-bold text-lg">Calendar totals</h3><p class="text-xs text-gray-500">Appointments and experimental model estimates are shown separately.</p></div>
-              <label class="text-xs font-semibold">Historical research bank
-                <select id="adminScenarioBank" onchange="renderCalendar()" class="bg-white border border-gray-200 rounded-lg p-2">
-                  <option value="first">First observed bank</option><option value="second">Second observed bank</option><option value="third">Third observed bank</option>
-                </select>
-              </label>
+              <div><h3 class="font-serif font-bold text-lg">Calendar totals</h3><p class="text-xs text-gray-500">Scheduled appointment counts for the selected calendar period.</p></div>
             </div>
             <div id="adminCalendarSummary" class="text-sm font-semibold bg-gray-50 rounded-xl p-3" aria-live="polite">Loading calendar totals…</div>
-            <p class="text-xs text-gray-500 leading-relaxed">Experimental traffic estimates are based on external Nigerian banking observations without verified historical dates. They are not validated Philippine branch forecasts. Scheduled appointments are not confirmed arrivals; unmodeled hours are labeled separately.</p>
+            <p class="text-xs text-gray-500 leading-relaxed">This calendar displays scheduled appointments only. Scheduled appointments are not confirmed arrivals. Verified arrivals are recorded separately.</p>
           </div>
           <div class="bg-white rounded-3xl border border-gray-200 p-4 sm:p-5 space-y-4" id="verifiedVisitPanel">
             <div>
@@ -455,7 +548,7 @@
         <section id="section-traffic" class="space-y-6 hidden">
           <div>
             <h2 class="font-serif font-black text-2xl md:text-3xl text-gray-900">Traffic Prediction & Analytics</h2>
-            <p class="text-gray-600 text-sm font-sans mt-1">Branch congestion insights and capacity planning forecast.</p>
+            <p class="text-gray-600 text-sm font-sans mt-1">Live appointment demand and experimental traffic research.</p>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -470,8 +563,8 @@
 
             <!-- Analytics Chart 2: Congestion Heat Forecast -->
             <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
-              <h3 class="font-serif font-bold text-lg text-gray-900">Branch Capacity Breakdown</h3>
-              <p class="text-xs text-gray-500">Predicted visitors per hour (synthetic model, not actual counter capacity)</p>
+              <h3 class="font-serif font-bold text-lg text-gray-900">Scheduled Appointments by Hour</h3>
+              <p class="text-xs text-gray-500">Today's scheduled appointments from the database (Pending, Approved and Checked In). Not measured customer arrivals or predicted traffic.</p>
               <div class="relative h-64">
                 <canvas id="capacityBarChart"></canvas>
               </div>
@@ -482,7 +575,7 @@
           <div class="bg-white rounded-3xl p-6 border border-gray-200 card-shadow space-y-4">
             <h3 class="font-serif font-bold text-lg text-gray-900">Staffing Planning Guidance</h3>
             <p id="staffingGuidance" class="text-sm text-gray-600" role="status">
-              Loading today's synthetic-model forecast…
+              Checking operational traffic forecast availability…
             </p>
           </div>
         </section>
@@ -618,5 +711,350 @@
 
   
   
+<!-- COMPASS_QR_EMPLOYEE_SCAN_V1: authenticated employee confirmation required. -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const section = document.getElementById('section-appointments');
+  if (!section) return;
+  const trigger = document.createElement('button');
+  trigger.id = 'compassQrScannerLaunch';
+  trigger.type = 'button';
+  trigger.textContent = 'Scan Arrival QR';
+  trigger.style.cssText = 'background:#7b4db1;color:white;border:0;border-radius:16px;padding:10px 16px;font-weight:bold;cursor:pointer;margin-bottom:12px';
+  const header = section.querySelector('h2');
+  if (header) header.parentElement.appendChild(trigger);
+  else section.prepend(trigger);
+
+  const shade=document.createElement('div');
+  shade.id='compassQrScannerDialog';
+  shade.style.cssText='display:none;position:fixed;inset:0;background:#000a;z-index:200;align-items:center;justify-content:center;padding:16px';
+  const card=document.createElement('div');
+  card.style.cssText='width:100%;max-width:440px;max-height:90vh;overflow:auto;background:white;border:3px solid #d8e63c;border-radius:20px;padding:24px;color:#111';
+  const heading=document.createElement('h3');heading.textContent='Verified Branch Arrival';heading.style.cssText='font-weight:bold;font-size:20px;margin-bottom:12px';
+  const guidance=document.createElement('p');guidance.textContent='Verify the customer in person. Scan their QR or enter their reference code. Arrival is recorded only after employee confirmation.';guidance.style.cssText='font-size:13px;margin-bottom:12px';
+  const camera=document.createElement('video'); camera.autoplay=true;camera.playsInline=true;camera.muted=true;camera.style.cssText='display:none;max-width:100%;margin-bottom:12px';
+  const ref=document.createElement('input');ref.type='text';ref.placeholder='CB-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';ref.style.cssText='width:100%;padding:11px;border:1px solid #bbb;border-radius:8px;margin:8px 0;overflow-wrap:anywhere';
+  const result=document.createElement('p');result.setAttribute('role','status');result.style.cssText='font-size:13px;overflow-wrap:anywhere;margin:10px 0';
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+  function btn(text){let b=document.createElement('button');b.type='button';b.textContent=text;b.style.cssText='padding:10px;border-radius:10px;background:#eee;cursor:pointer';return b;}
+  const scan=btn('Use camera'), confirm=btn('Confirm arrival'), close=btn('Close');confirm.style.background='#d8e63c';
+  actions.append(scan,confirm,close);card.append(heading,guidance,camera,ref,result,actions);shade.append(card);document.body.appendChild(shade);
+  let stream=null, frame=null, scanning=false;
+  function stopCamera(){scanning=false;if(frame)cancelAnimationFrame(frame);frame=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;camera.srcObject=null;camera.style.display='none';}
+  trigger.addEventListener('click',()=>{if(typeof employeeToken!=='string'||!employeeToken){alert('Employee login required');return;}result.textContent='';shade.style.display='flex';});
+  close.addEventListener('click',()=>{stopCamera();shade.style.display='none';});
+  scan.addEventListener('click',async()=>{
+    if(!('BarcodeDetector' in window)||!navigator.mediaDevices?.getUserMedia){result.textContent='Camera QR detection unavailable in this browser. Enter the reference manually.';return;}
+    try {
+      const detector=new BarcodeDetector({formats:['qr_code']});
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      camera.srcObject=stream;camera.style.display='block';await camera.play();scanning=true;
+      const step=async()=>{if(!scanning)return;try{for(const item of await detector.detect(camera)){const text=String(item.rawValue||'').trim();if(/^CB-[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(text)){ref.value=text;result.textContent='QR read. Verify visitor, then click Confirm arrival.';stopCamera();return;}}}catch(e){}if(scanning)frame=requestAnimationFrame(step);};frame=requestAnimationFrame(step);
+    }catch(e){stopCamera();result.textContent='Camera unavailable: '+e.message+'. Enter reference manually.';}
+  });
+  confirm.addEventListener('click',async()=>{
+    const value=ref.value.trim();
+    if(!/^CB-[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value)){result.textContent='Enter a valid Compass Bank reference';return;}
+    if(!window.confirm('Have you physically verified this customer arrived at the branch?'))return;
+    confirm.disabled=true;
+    try {
+      if(typeof employeeToken!=='string'||!employeeToken)throw new Error('Employee session expired. Log in again.');
+      const response=await fetch('/api/employee/visits/appointments/'+encodeURIComponent(value)+'/check-in',{method:'POST',headers:{Authorization:'Bearer '+employeeToken,'Content-Type':'application/json'}});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.message||'Unable to record visit');
+      result.textContent='SUCCESS: Visit verified and recorded. Appointment status: Checked In.';
+      if(typeof refreshEmployeeAppointments==='function')await refreshEmployeeAppointments();
+    }catch(e){result.textContent='Check-in blocked: '+e.message;}
+    finally{confirm.disabled=false;}
+  });
+});
+</script>
+
+
+<!-- COMPASS_SCANNER_V4 -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const dialog = document.getElementById('compassQrScannerDialog');
+  if (!dialog) return;
+
+  const card = dialog.firstElementChild;
+  const buttons = Array.from(card.querySelectorAll('button'));
+  const cameraButton = buttons.find(b => b.textContent.trim() === 'Use camera');
+  const closeButton = buttons.find(b => b.textContent.trim() === 'Close');
+  const reference = card.querySelector('input[type="text"]');
+  const status = card.querySelector('[role="status"]');
+
+  if (!cameraButton || !closeButton || !reference || !status) return;
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const video = document.createElement('video');
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = true;
+  video.style.cssText = 'display:none;width:100%;max-height:240px;margin:12px 0';
+
+  const upload = document.createElement('input');
+  upload.type = 'file';
+  upload.accept = 'image/png,image/jpeg,image/webp';
+  upload.setAttribute('aria-label', 'Upload QR screenshot');
+  upload.style.cssText = 'display:block;width:100%;margin:12px 0';
+
+  const label = document.createElement('p');
+  label.textContent = 'Or upload a screenshot of the customer QR:';
+  label.style.cssText = 'font-size:13px;margin-top:12px';
+
+  const actions = cameraButton.parentElement;
+  actions.before(video);
+  actions.after(label, upload);
+
+  const pattern = /^CB-[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+
+  let stream = null;
+  let active = false;
+  let frame = 0;
+
+  function stop() {
+    active = false;
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0;
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    stream = null;
+    video.srcObject = null;
+    video.style.display = 'none';
+  }
+
+  function decode(width, height) {
+    if (typeof jsQR !== 'function' || !context) return null;
+
+    const image = context.getImageData(0, 0, width, height);
+    const result = jsQR(image.data, width, height, {
+      inversionAttempts: 'attemptBoth'
+    });
+
+    return result ? result.data.trim() : null;
+  }
+
+  function accept(value) {
+    if (!pattern.test(value || '')) return false;
+
+    reference.value = value;
+    status.textContent =
+      'QR decoded. Verify the visitor, then click Confirm arrival.';
+    stop();
+    return true;
+  }
+
+  cameraButton.addEventListener('click', async function (event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    stop();
+
+    if (typeof jsQR !== 'function') {
+      status.textContent = 'QR decoder unavailable. Check internet connection.';
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      status.textContent = 'Camera unavailable. Upload the QR screenshot instead.';
+      return;
+    }
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+
+      video.srcObject = stream;
+      video.style.display = 'block';
+      await video.play();
+      active = true;
+
+      status.textContent = 'Point the camera at the QR code.';
+
+      function scan() {
+        if (!active) return;
+        frame = requestAnimationFrame(scan);
+
+        if (video.readyState < 2 || !video.videoWidth) return;
+
+        const width = Math.min(video.videoWidth, 800);
+        const height = Math.round(
+          video.videoHeight * width / video.videoWidth
+        );
+
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(video, 0, 0, width, height);
+
+        accept(decode(width, height));
+      }
+
+      frame = requestAnimationFrame(scan);
+
+    } catch (error) {
+      stop();
+      status.textContent = 'Camera error: ' + error.message;
+    }
+  }, true);
+
+  upload.addEventListener('change', async function () {
+    const file = upload.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      status.textContent = 'Image must be smaller than 8 MB.';
+      return;
+    }
+
+    try {
+      if (typeof jsQR !== 'function') {
+        throw new Error('QR decoder library did not load');
+      }
+
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(
+        1, 1600 / Math.max(bitmap.width, bitmap.height)
+      );
+
+      const width = Math.round(bitmap.width * scale);
+      const height = Math.round(bitmap.height * scale);
+
+      canvas.width = width;
+      canvas.height = height;
+      context.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close();
+
+      if (!accept(decode(width, height))) {
+        status.textContent = 'Could not read a valid Compass Bank QR.';
+      }
+
+    } catch (error) {
+      status.textContent = 'QR image error: ' + error.message;
+    }
+  });
+
+  closeButton.addEventListener('click', stop, true);
+});
+</script>
+<script src="js/sop14-integration.js" defer></script>
+<script src="js/compass-admin-dashboard-ml.js" defer></script>
+<!-- COMPASS_ADMIN_V4_INSTALL --><script src="js/compass-admin-v4.js" defer></script>
+<!-- COMPASS_ADMIN_CALENDAR_V5 -->
+<script src="js/compass-admin-calendar-v5.js" defer></script>
+<!-- COMPASS_REMOVE_ML_COMPARISON_TABLE -->
+<script>
+(function () {
+    function removeComparisonTable() {
+        document.querySelectorAll("table").forEach(function (table) {
+            const headers = Array.from(
+                table.querySelectorAll("th")
+            ).map(function (th) {
+                return th.textContent.trim().toLowerCase();
+            }).join(" ");
+
+            const isTarget =
+                headers.includes("performance evidence") &&
+                headers.includes("observed nigerian data") &&
+                headers.includes("simulated 2026 data");
+
+            if (isTarget) {
+                table.remove();
+            }
+        });
+    }
+
+    function initialize() {
+        removeComparisonTable();
+
+        const observer = new MutationObserver(function () {
+            removeComparisonTable();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initialize);
+    } else {
+        initialize();
+    }
+})();
+</script>
+<!-- END COMPASS_REMOVE_ML_COMPARISON_TABLE -->
+
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
 </body>
 </html>
+
+<!-- COMPASS_RESEARCH_VISUAL_POLISH_V1: consistent navigation icons -->

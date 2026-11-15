@@ -32,7 +32,8 @@
       if (document.getElementById('verifiedVisitHourlyRows')) refreshVerifiedVisits();
     }
 
-    let currentFilter = 'All';
+    let currentFilter = 'Approved';
+    let currentAppointmentSort = 'dateAsc'; // COMPASS_APPROVED_SORT_V1
     let currentActiveModalAppId = null;
     let calendarCurrentDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     let calendarViewMode = 'month';
@@ -74,7 +75,7 @@ function formatPeso(amount) {
       }
     }
 
-    // Model forecasts are demonstrations based on synthetic historical visits.
+    // Operational future-date forecasts remain unavailable. Experimental models use a four-week Nigerian bank-arrival dataset without verified calendar dates.
     async function loadEmployeeForecast() {
       const now = new Date();
       const start = [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
@@ -97,13 +98,13 @@ function formatPeso(amount) {
         const headline = banner.querySelector('h3');
         if (headline) headline.textContent = f ? `${f.date}: ${f.level === 'closed' ? 'Branch closed' : f.expectedVisitors + ' expected visitors'}` : 'No model forecast for selected date';
         const explanation = banner.querySelector('p.text-xs');
-        if (explanation) explanation.textContent = 'Synthetic-data Random Forest prediction; not measured branch traffic.';
+        if (explanation) explanation.textContent = 'No validated forecast is available for Philippine branch dates. Experimental predictions are available under Experimental ML Scenarios.';
       }
       const chartEl = document.getElementById('trafficPredictionChart');
       if (!chartEl || typeof Chart === 'undefined') return;
       if (trafficChartRef) trafficChartRef.destroy();
       const hours = f?.hours || [];
-      trafficChartRef = new Chart(chartEl, {type:'bar',data:{labels:hours.map(h=>`${h.hour}:00`),datasets:[{label:'Predicted visits (synthetic model)',data:hours.map(h=>h.predicted_visits),backgroundColor:'#8050b0'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+      trafficChartRef = new Chart(chartEl, {type:'bar',data:{labels:hours.map(h=>`${h.hour}:00`),datasets:[{label:'Operational forecast (when available)',data:hours.map(h=>h.predicted_visits),backgroundColor:'#8050b0'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
     }
 
     // Live analytics: service mix from MySQL appointments; hourly demand from the
@@ -135,36 +136,150 @@ function formatPeso(amount) {
         });
       }
       const barEl = document.getElementById('capacityBarChart');
+
       if (barEl) {
         if (capacityBarChartRef) capacityBarChartRef.destroy();
-        const today = localDateString(new Date());
-        const f = forecastByDate.get(today);
-        const hours = f?.hours || [];
+
+        const dateParts = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(new Date());
+
+        const parts = Object.fromEntries(
+          dateParts.map(part => [part.type, part.value])
+        );
+
+        const today = parts.year + '-' +
+          parts.month + '-' + parts.day;
+
+        const hours = Array.from(
+          {length: 8}, (_, i) => i + 9
+        );
+
+        const counts = hours.map(hour =>
+          appointments.filter(a =>
+            a.date === today &&
+            ['Pending', 'Approved', 'Checked In'].includes(a.status) &&
+            String(a.time).slice(0, 2) ===
+              String(hour).padStart(2, '0')
+          ).length
+        );
+
         capacityBarChartRef = new Chart(barEl, {
-          type:'bar',
-          data:{labels:hours.length ? hours.map(h => `${h.hour}:00`) : ['No forecast'],
-            datasets:[{label:'Predicted visitors/hour (synthetic model)',
-              data:hours.length ? hours.map(h => h.predicted_visits) : [0],backgroundColor:'#8050b0'}]},
-          options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}},
-            plugins:{legend:{display:true}}}
+          type: 'bar',
+          data: {
+            labels: hours.map(hour =>
+              String(hour).padStart(2, '0') + ':00'
+            ),
+            datasets: [{
+              label: 'Scheduled appointments by hour (live database)',
+              data: counts,
+              backgroundColor: '#8050b0'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0
+                }
+              }
+            },
+            plugins: {
+              legend: {display: true},
+              tooltip: {enabled: true}
+            }
+          }
         });
       }
+
       renderStaffingGuidance();
     }
+    // Appointment workload summary (database-backed).
+    // Appointment demand is not total customer traffic or a staff estimate.
     function renderStaffingGuidance() {
       const box = document.getElementById('staffingGuidance');
       if (!box) return;
-      const f = forecastByDate.get(localDateString(new Date()));
-      const hours = f?.hours || [];
-      if (!hours.length) {
-        box.textContent = 'No operating-hour forecast for today. No staffing estimate is available.';
+
+      if (!employeeToken) {
+        box.textContent =
+          'Sign in to review scheduled appointment workload.';
         return;
       }
-      const peak = [...hours].sort((a,b) => b.predicted_visits-a.predicted_visits)[0];
-      box.textContent = `Illustrative planning guidance only: model peak is ${peak.hour}:00–${peak.hour+1}:00 ` +
-        `(${peak.predicted_visits} predicted visits). A manager should review staffing; ` +
-        `the model does not know actual teller availability or service times.`;
+
+      const dateParts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Manila',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(new Date());
+
+      const parts = Object.fromEntries(
+        dateParts.map(part => [part.type, part.value])
+      );
+
+      const today = parts.year + '-' +
+        parts.month + '-' + parts.day;
+
+      const hours = Array.from(
+        {length: 8}, (_, i) => i + 9
+      );
+
+      const eligible = appointments.filter(a =>
+        a.date === today &&
+        ['Pending', 'Approved', 'Checked In'].includes(a.status)
+      );
+
+      const hourly = hours.map(hour => ({
+        hour,
+        count: eligible.filter(a =>
+          String(a.time).slice(0, 2) ===
+          String(hour).padStart(2, '0')
+        ).length
+      }));
+
+      const total = hourly.reduce(
+        (sum, item) => sum + item.count, 0
+      );
+
+      const busiest = hourly.reduce(
+        (best, item) =>
+          item.count > best.count ? item : best,
+        {hour: null, count: 0}
+      );
+
+      if (total === 0) {
+        box.textContent =
+          'No qualifying appointments scheduled for today. ' +
+          'This does not mean the branch will have no walk-in customers. ' +
+          'No validated staffing forecast is available.';
+        return;
+      }
+
+      const peakHours = hourly.filter(
+        item => item.count === busiest.count
+      ).map(item =>
+        String(item.hour).padStart(2, '0') + ':00'
+      );
+
+      box.textContent =
+        'Today (' + today + '): ' + total +
+        ' scheduled appointment(s) across 09:00?17:00. ' +
+        'Busiest scheduled hour(s): ' + peakHours.join(', ') +
+        ' with ' + busiest.count +
+        ' appointment(s) each. ' +
+        'Review scheduled services and employee availability ' +
+        'during these periods. Appointment counts exclude ' +
+        'cancelled, completed and no-show records and do not ' +
+        'represent all arrivals, predict walk-ins, or determine ' +
+        'the required number of employees.';
     }
+
     function initCharts() { renderAnalyticsCharts(); }
 
 
@@ -178,6 +293,47 @@ function formatPeso(amount) {
       initCharts();
     });
 
+    // Automatically synchronize customer bookings with the employee dashboard.
+    let compassSyncRunning = false;
+    let compassLastSnapshot = null;
+
+    async function compassAutoSyncAppointments() {
+      if (!employeeToken || document.hidden || compassSyncRunning) return;
+
+      compassSyncRunning = true;
+      const token = employeeToken;
+
+      try {
+        const response = await fetch(employeeApi + '/appointments', {
+          headers: { Authorization: 'Bearer ' + token },
+          cache: 'no-store'
+        });
+
+        if (!response.ok || token !== employeeToken) return;
+
+        const data = await response.json();
+        if (!Array.isArray(data.appointments)) return;
+
+        const snapshot = JSON.stringify(data.appointments);
+
+        if (snapshot !== compassLastSnapshot) {
+          compassLastSnapshot = snapshot;
+          await refreshEmployeeAppointments();
+        }
+      } catch (error) {
+        console.warn('Appointment sync failed:', error.message);
+      } finally {
+        compassSyncRunning = false;
+      }
+    }
+
+    setInterval(compassAutoSyncAppointments, 8000);
+
+    window.addEventListener('focus', compassAutoSyncAppointments);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) compassAutoSyncAppointments();
+    });
     // Clock
     function startClock() {
       function update() {
@@ -242,6 +398,12 @@ function formatPeso(amount) {
 
     // NAVIGATION TABS
     function switchNavTab(tabId) {
+      const research = document.getElementById('section-research');
+      if (research) research.classList.add('hidden');
+      document.querySelectorAll('[data-research-module]').forEach(button => {
+        button.classList.remove('bg-brandLime','text-black','shadow-sm');
+        button.classList.add('text-gray-600');
+      });
       const tabs = ['dashboard', 'appointments', 'calendar', 'traffic'];
       tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
@@ -332,19 +494,39 @@ function formatPeso(amount) {
       renderAppointmentsTable();
     }
 
+function setAppointmentSort(value) {
+  const choices = ['dateAsc','dateDesc','nameAsc','nameDesc','serviceAsc','serviceDesc'];
+  currentAppointmentSort = choices.includes(value) ? value : 'dateAsc';
+  renderAppointmentsTable();
+}
 function renderAppointmentsTable() {
   const tbody = document.getElementById('fullAppointmentsTable');
   const searchQuery = document.getElementById('appointmentSearchInput').value.toLowerCase().trim();
   tbody.innerHTML = '';
 
+  // COMPASS_APPROVED_SORT_V1: active appointment list only; no database rows deleted.
   const filtered = appointments.filter(app => {
-    const matchesStatus = currentFilter === 'All' || app.status === currentFilter;
-    const matchesSearch = app.id.toLowerCase().includes(searchQuery) ||
-                          app.accountNumber.toLowerCase().includes(searchQuery) ||
-                          app.email.toLowerCase().includes(searchQuery) ||
-                          String(app.checkNumber || '').toLowerCase().includes(searchQuery);
+    if (app.status !== 'Approved') return false;
+    return String(app.id || '').toLowerCase().includes(searchQuery) ||
+      String(app.name || '').toLowerCase().includes(searchQuery) ||
+      String(app.email || '').toLowerCase().includes(searchQuery) ||
+      String(app.type || '').toLowerCase().includes(searchQuery) ||
+      String(app.accountNumber || '').toLowerCase().includes(searchQuery) ||
+      String(app.checkNumber || '').toLowerCase().includes(searchQuery);
+  });
 
-    return matchesStatus && matchesSearch;
+  const compare = (a, b) => String(a || '').localeCompare(String(b || ''), 'en', {sensitivity:'base', numeric:true});
+  filtered.sort((a,b) => {
+    let result = 0;
+    switch (currentAppointmentSort) {
+      case 'dateDesc': result = compare(b.date + ' ' + b.time, a.date + ' ' + a.time); break;
+      case 'nameAsc': result = compare(a.name, b.name); break;
+      case 'nameDesc': result = compare(b.name, a.name); break;
+      case 'serviceAsc': result = compare(a.type, b.type); break;
+      case 'serviceDesc': result = compare(b.type, a.type); break;
+      default: result = compare(a.date + ' ' + a.time, b.date + ' ' + b.time); break;
+    }
+    return result || compare(a.id, b.id);
   });
 
   if (filtered.length === 0) {
@@ -365,7 +547,7 @@ function renderAppointmentsTable() {
       <td class="px-6 py-4 font-mono font-bold text-xs text-brandPurple">${app.id}</td>
 
       <td class="px-6 py-4">
-        <p class="font-mono font-bold text-gray-900">${app.accountNumber}</p>
+        <p class="font-mono font-bold text-gray-900">${safeText(app.name || 'Not provided')}</p>
         <p class="text-xs text-gray-500">${app.email}</p>
       </td>
 
@@ -380,8 +562,26 @@ function renderAppointmentsTable() {
         </span>
       </td>
 
-      <td class="px-6 py-4 whitespace-nowrap">
+      <td class="px-6 py-4">
         <span class="font-bold text-emerald-700">${formatPeso(app.amount)}</span>
+
+        ${app.amountDataQualityIssue
+          ? `<div class="mt-1 text-xs font-bold text-red-700">
+               Transaction Data Needs Review
+             </div>`
+          : ''}
+
+        ${app.cashReviewEligible && app.cashReviewRequired
+          ? `<div class="mt-1 text-xs font-bold text-red-700"
+                  title="Cash transaction meets the configured staff-review threshold">
+               Staff Review Required
+             </div>`
+          : app.cashReviewEligible && !app.cashReviewPolicyConfigured
+          ? `<div class="mt-1 text-xs font-semibold text-amber-700"
+                  title="Bank cash-review threshold has not been configured">
+               Review Policy Not Configured
+             </div>`
+          : ''}
       </td>
 
       <td class="px-6 py-4 whitespace-nowrap">
@@ -461,18 +661,59 @@ function renderAppointmentsTable() {
 
       const transContainer = document.getElementById('detailTransactionsList');
       transContainer.innerHTML = '';
-      app.transactions.forEach(t => {
+      app.transactions.forEach((t, index) => {
         const div = document.createElement('div');
-        div.className = "text-gray-900 font-bold";
-        div.innerText = `• ${t}`;
+        div.className =
+          "bg-white border border-gray-200 rounded-lg p-3 mb-2 " +
+          "text-xs text-gray-900 leading-relaxed break-words";
+
+        const heading = document.createElement('div');
+        heading.className = "font-bold text-brandPurple mb-1";
+        heading.textContent = `Transaction ${index + 1}`;
+
+        const description = document.createElement('div');
+        description.className = "text-gray-800";
+        description.textContent = t;
+
+        div.appendChild(heading);
+        div.appendChild(description);
         transContainer.appendChild(div);
       });
+
+      if (app.amountDataQualityIssue) {
+        const warning = document.createElement('div');
+        warning.className = "text-xs font-bold text-red-700 p-2 mt-2";
+        warning.textContent =
+          "Transaction Data Needs Review: one or more monetary amounts are invalid.";
+        transContainer.appendChild(warning);
+      }
 
       // Show actions according to the appointment's current status.
       const actionContainer = document.getElementById('detailActionButtons');
       actionContainer.innerHTML = '';
 
       const buttonBase = 'w-40 max-w-full flex items-center justify-center text-center px-4 py-2.5 rounded-xl text-xs font-serif font-bold text-white transition-colors shadow-sm';
+
+      // Evaluate appointment actions using branch-local Manila time.
+      const nowParts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Manila',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(new Date());
+      const nowValues = Object.fromEntries(
+        nowParts.map(part => [part.type, part.value])
+      );
+      const branchToday =
+        nowValues.year + '-' + nowValues.month + '-' + nowValues.day;
+      const branchNow =
+        branchToday + ' ' + nowValues.hour + ':' + nowValues.minute;
+      const scheduledAt = app.date + ' ' + String(app.time).slice(0, 5);
+      const canCheckIn = app.date === branchToday;
+      const canMarkNoShow = scheduledAt <= branchNow;
 
       if (app.status === 'Pending') {
         actionContainer.innerHTML = `
@@ -481,21 +722,34 @@ function renderAppointmentsTable() {
         `;
       } else if (app.status === 'Approved') {
         actionContainer.innerHTML = `
-          <button onclick="updateAppointmentStatusFromModal('Checked In')" class="${buttonBase} bg-emerald-600 hover:bg-emerald-700">Record check-in</button>
-          <button onclick="updateAppointmentStatusFromModal('No Show')" class="${buttonBase} bg-rose-700 hover:bg-rose-800">Mark no-show</button>
+          ${canCheckIn
+            ? `<button onclick="updateAppointmentStatusFromModal('Checked In')" class="${buttonBase} bg-emerald-600 hover:bg-emerald-700">Record check-in</button>`
+            : `<p class="text-sm text-gray-500">Check-in is available only on the scheduled branch date.</p>`}
+          ${canMarkNoShow
+            ? `<button onclick="updateAppointmentStatusFromModal('No Show')" class="${buttonBase} bg-rose-700 hover:bg-rose-800">Mark no-show</button>`
+            : `<p class="text-sm text-gray-500">No-show is available after the scheduled appointment time.</p>`}
           <button onclick="updateAppointmentStatusFromModal('Cancelled')" class="${buttonBase} bg-red-600 hover:bg-red-700">Cancel</button>
         `;
       } else if (app.status === 'Checked In') {
         actionContainer.innerHTML = `
           <button onclick="updateAppointmentStatusFromModal('Completed')" class="${buttonBase} bg-slate-700 hover:bg-slate-800">Complete service</button>
         `;
+      } else if (app.status === 'No Show') {
+        actionContainer.innerHTML = `
+          <p class="text-sm text-gray-500">
+            This appointment was marked as a no-show.
+            It is a final status and cannot be reopened.
+            No verified customer arrival was recorded by
+            this status change.
+          </p>
+        `;
       } else if (app.status === 'Cancelled') {
         actionContainer.innerHTML = `
-          <button onclick="updateAppointmentStatusFromModal('Pending')" class="${buttonBase} bg-amber-500 hover:bg-amber-600">↩ Undo</button>
+          <p class="text-sm text-gray-500">This appointment has been cancelled and cannot be reopened.</p>
         `;
       } else if (app.status === 'Completed') {
         actionContainer.innerHTML = `
-          <button onclick="updateAppointmentStatusFromModal('Approved')" class="${buttonBase} bg-amber-500 hover:bg-amber-600">↩ Undo (Revert to Approved)</button>
+          <p class="text-sm text-gray-500">This appointment has been completed. Its final status cannot be reversed.</p>
         `;
       }
 
@@ -662,19 +916,6 @@ function renderAppointmentsTable() {
       document.getElementById(modalId).classList.remove('flex');
     }
 
-    // Phase 4P: original employee calendar now displays appointments and external experimental traffic together.
-    let researchScenarioData = null;
-    let researchScenarioAttempted = false;
-    let researchScenarioPending = false;
-    function loadCalendarResearchScenarios() {
-      if (researchScenarioAttempted || researchScenarioPending) return;
-      researchScenarioPending = true;
-      fetch('/api/research-traffic-scenarios')
-        .then(response => { if (!response.ok) throw Error('Research scenarios unavailable'); return response.json(); })
-        .then(data => { if (!Array.isArray(data.scenarios)) throw Error('Invalid scenarios'); researchScenarioData=data; })
-        .catch(() => { researchScenarioData=null; })
-        .finally(() => { researchScenarioPending=false; researchScenarioAttempted=true; renderCalendar(); });
-    }
     function setCalendarView(mode) {
       if (!['month','week','day'].includes(mode)) return;
       calendarViewMode=mode;
@@ -694,15 +935,12 @@ function renderAppointmentsTable() {
     function renderCalendar() {
       const grid=document.getElementById('calendarGrid'),label=document.getElementById('calendarMonthLabel');
       if (!grid || !label) return;
-      loadCalendarResearchScenarios();
+
       grid.replaceChildren();
-      const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
       const pad=n=>String(n).padStart(2,'0');
       const dateKey=d=>[d.getFullYear(),pad(d.getMonth()+1),pad(d.getDate())].join('-');
       const dateAdd=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
       const toWeekStart=d=>dateAdd(d,-(d.getDay()+6)%7);
-      const bank=document.getElementById('adminScenarioBank')?.value || 'first';
-      const scenario=d=>researchScenarioData?.scenarios?.find(x=>x.bank===bank&&x.weekday===days[d.getDay()]) || null;
       const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
       const active=a=>a.status!=='Cancelled'&&a.status!=='No Show';
       const y=calendarCurrentDate.getFullYear(),m=calendarCurrentDate.getMonth();
@@ -711,34 +949,30 @@ function renderAppointmentsTable() {
       else if(calendarViewMode==='week'){const start=toWeekStart(calendarCurrentDate);dates=Array.from({length:7},(_,i)=>dateAdd(start,i));}
       else dates=[new Date(y,m,calendarCurrentDate.getDate())];
       label.textContent=calendarViewMode==='month'?calendarCurrentDate.toLocaleDateString('en-US',{month:'long',year:'numeric'}):calendarViewMode==='week'?dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):dates[0].toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
-      const keys=new Set(dates.map(dateKey)),periodApps=appointments.filter(a=>keys.has(a.date)&&active(a)),models=dates.map(scenario).filter(Boolean);
-      const modeledTotal=models.reduce((sum,x)=>sum+Number(x.estimated_observed_hours_total||0),0);
+      const keys=new Set(dates.map(dateKey)),periodApps=appointments.filter(a=>keys.has(a.date)&&active(a));
       const summary=document.getElementById('adminCalendarSummary');
-      if(summary)summary.textContent='Scheduled customers: '+periodApps.length+' (non-cancelled appointments) · Experimental modeled visits: '+
-        (models.length?Math.round(modeledTotal).toLocaleString():'Unavailable')+' · '+calendarViewMode+' view. These totals are not combined.';
+      if(summary)summary.textContent='Scheduled appointments: '+periodApps.length+' (excluding cancelled and no-show) ? '+calendarViewMode+' view.';
       if(calendarViewMode==='month'){
         grid.className='grid grid-cols-7 gap-2';
         ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(t=>grid.append(node('div','text-center font-serif font-bold text-xs text-gray-500 py-2',t)));
         for(let i=0;i<dates[0].getDay();i++)grid.append(node('span','admin-cal-empty'));
       }else grid.className='admin-unified-days';
       dates.forEach(d=>{
-        const key=dateKey(d),bookings=appointments.filter(a=>a.date===key),count=bookings.filter(active).length,r=scenario(d);
+        const key=dateKey(d),bookings=appointments.filter(a=>a.date===key),count=bookings.filter(active).length;
         const cell=node('div','admin-unified-cell');
         const head=node('button','admin-unified-date',calendarViewMode==='month'?String(d.getDate()):d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
         head.type='button';head.title='Show '+d.toDateString()+' appointment hours';
         head.onclick=()=>{calendarCurrentDate=new Date(d);setCalendarView('day');};
         cell.append(head,node('div','admin-unified-booked',count+' scheduled'));
-        cell.append(node('small','admin-unified-est',r?Math.round(Number(r.estimated_observed_hours_total)).toLocaleString()+' experimental visits · '+String(r.traffic_level).toUpperCase():'Traffic not modeled'));
+        cell.append(node('small','admin-unified-est','No validated traffic forecast'));
         if(calendarViewMode==='day'){
           const hours=node('div','admin-unified-hours');
           for(let h=9;h<17;h++){
             const slotStart=pad(h)+':00',next=pad(h+1)+':00';
             const slotApps=bookings.filter(a=>String(a.time).slice(0,2)===pad(h));
-            const forecast=r?.observed_hours?.find(item=>item.hour_start===slotStart);
             const row=node('div','admin-unified-hour');
             row.append(node('strong','',slotStart+'–'+next));
             row.append(node('span','',slotApps.filter(active).length+' scheduled'));
-            row.append(node('small','',forecast?Math.round(Number(forecast.estimated_customers))+' experimental visits':'Not modeled'));
             slotApps.forEach(a=>{const b=node('button','admin-unified-app',a.time+' · '+a.status+' · '+a.type);b.type='button';b.onclick=()=>openDetailsModal(a.id);row.append(b);});
             hours.append(row);
           }
@@ -753,3 +987,114 @@ function renderAppointmentsTable() {
         grid.append(cell);
       });
     }
+
+// COMPASS_UNIFIED_RESEARCH_DEMO: Same-shell research modules, no new browser tab.
+const COMPASS_RESEARCH_MODULES = {
+  dataset: {src: 'dataset.html', title: 'Dataset Intelligence', subtitle: 'Validate, clean and review uploaded research records'},
+  scenarios: {src: 'traffic-scenarios-reconciled.html', title: 'Archived Nigerian Scenarios', subtitle: 'Separate four-week Nigerian bank experiment; not the 2026 simulated thesis model'},
+  evaluation: {src: 'evaluation-thesis-2026.html', title: 'ML Evaluation: Real vs Simulated', subtitle: 'Classification and regression | two different research datasets'}
+};
+
+// Same-origin research bridge; keep employee credentials in the parent.
+window.compassResearchPredict = async function(bankId, dayPosition) {
+  if (!employeeToken) {
+    throw new Error('Employee login required');
+  }
+
+  const valid = (v, min, max) =>
+    Number.isInteger(v) && v >= min && v <= max;
+
+  if (!valid(bankId, 1, 3) || !valid(dayPosition, 1, 5)) {
+    throw new Error('Invalid research observation selection');
+  }
+
+  const response = await fetch('/api/employee/research/predict', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + employeeToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      bank_id: bankId,
+      day_position: dayPosition
+    }),
+    cache: 'no-store'
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      response.status === 401
+        ? 'Employee session expired; sign in again'
+        : 'Experimental inference service unavailable'
+    );
+  }
+
+  const payload = await response.json();
+
+  if (!payload.ok ||
+      payload.result?.status !== 'experimental_model_inference') {
+    throw new Error('Invalid experimental prediction response');
+  }
+
+  return payload.result;
+};
+
+
+// Read-only employee research access; credentials remain in parent.
+window.compassResearchArrivalSummary = async function(from, to) {
+  if (!employeeToken) throw new Error('Employee login required');
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+    throw new Error('Invalid date range');
+  }
+
+  const params = new URLSearchParams({from, to});
+  const response = await fetch(
+    '/api/employee/visits/hourly?' + params.toString(),
+    {
+      headers: {Authorization:'Bearer ' + employeeToken},
+      cache:'no-store'
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Verified arrival data unavailable');
+  }
+
+  const result = await response.json();
+
+  if (result.status !== 'ok' ||
+      result.timezone !== 'Asia/Manila' ||
+      !Array.isArray(result.rows)) {
+    throw new Error('Unexpected arrival data format');
+  }
+
+  return result;
+};
+
+function openResearchModule(moduleId) {
+  const config=COMPASS_RESEARCH_MODULES[moduleId];
+  if (!config) return;
+  const dashboard=document.getElementById('dashboardView');
+  if (!dashboard || dashboard.classList.contains('hidden')) return;
+  ['dashboard','appointments','calendar','traffic'].forEach(id => {
+    document.getElementById('section-'+id)?.classList.add('hidden');
+    const button=document.getElementById('nav-'+id);
+    if (button) button.className='nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-serif font-bold text-sm text-gray-600 hover:bg-gray-100 transition-all duration-150';
+  });
+  document.querySelectorAll('[data-research-module]').forEach(button => {
+    const active=button.dataset.researchModule===moduleId;
+    button.classList.toggle('bg-brandLime',active);
+    button.classList.toggle('text-black',active);
+    button.classList.toggle('shadow-sm',active);
+    button.classList.toggle('text-gray-600',!active);
+  });
+  document.getElementById('researchModuleTitle').textContent=config.title;
+  document.getElementById('researchModuleSubtitle').textContent=config.subtitle;
+  document.getElementById('section-research').classList.remove('hidden');
+  const frame=document.getElementById('researchModuleFrame');
+  if (frame.getAttribute('src')!==config.src) frame.src=config.src;
+  const sidebar=document.getElementById('sidebar');
+  sidebar?.classList.add('hidden'); sidebar?.classList.add('lg:flex');
+}

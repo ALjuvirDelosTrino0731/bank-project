@@ -1,0 +1,20 @@
+/* Research traffic colors appear inside the existing booking calendar only. */
+.comp-traffic-legend{background:#fff;border:1px solid #e3e5c2;border-radius:12px;padding:10px 12px;margin:10px 0;font:12px/1.5 Inter,Arial,sans-serif;color:#344039}
+.comp-traffic-legend strong{display:block;font-size:13px;margin-bottom:5px}
+.comp-traffic-legend p{margin:5px 0 0;color:#536259;font-size:11px}
+.comp-traffic-colors{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.comp-traffic-colors span{display:inline-flex;gap:5px;align-items:center;font-weight:650}
+.comp-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #a7a7a7}
+.comp-dot.comp-low{background:#a5eec0;border-color:#238451}
+.comp-dot.comp-moderate{background:#fff2a1;border-color:#b68e00}
+.comp-dot.comp-high{background:#ffb8b8;border-color:#bb4040}
+.comp-dot.comp-unavailable{background:#e5e7eb;border-color:#9ca3af}
+.unified-cal-date.comp-traffic-low{background:#dff9e8!important;border-color:#2caa60!important;color:#14532d!important}
+.unified-cal-date.comp-traffic-moderate{background:#fff6c8!important;border-color:#dba800!important;color:#70520c!important}
+.unified-cal-date.comp-traffic-high{background:#ffe5e5!important;border-color:#df5252!important;color:#7f1d1d!important}
+.unified-cal-date.selected.comp-traffic-low,.unified-cal-date.selected.comp-traffic-moderate,.unified-cal-date.selected.comp-traffic-high{outline:3px solid #7b4db1;outline-offset:-3px}
+.unified-cal-date.unified-cal-unbookable{filter:grayscale(.6)}
+.comp-hour-risk{display:block;font-size:11px;font-weight:750;color:#5a367f;background:#efe8fa;border-radius:7px;padding:4px 7px;margin-top:4px}
+.comp-hour-disclaimer{background:#fff9ec;border-left:3px solid #d8ac37;padding:8px 10px;line-height:1.55!important}
+/* The calendar is the only visible appointment-time picker. The original select remains as the code's internal state. */
+#appointmentForm .grid:has(> label[for="appointmentTime"]){display:none!important}

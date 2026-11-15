@@ -17,10 +17,43 @@ const {
 } = require("./bookingValidation");
 
 const app = express();
+// COMPASS PRIVATE RAILWAY STAGING GATE V1
+app.use(require("./compass-staging-gate.cjs"));
 const PORT = process.env.PORT || 3000;
+
+// COMPASS DEPLOYMENT READINESS PATCH v1
+// Basic headers; preserve same-origin iframes used by the admin research pages.
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
+// Liveness: the Node process is responding, without disclosing internal details.
+app.get("/health", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.status(200).json({ status: "ok" });
+});
+
+// Readiness: return 503 if the database is unavailable.
+// Use /ready for the cloud hosting health check once MySQL is configured.
+app.get("/ready", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    await db.query("SELECT 1");
+    return res.status(200).json({ status: "ready" });
+  } catch (error) {
+    console.error("Readiness check failed:", error.code || error.message);
+    return res.status(503).json({ status: "unavailable" });
+  }
+});
+// END COMPASS DEPLOYMENT READINESS PATCH v1
 
 // Allow the server to understand JSON data.
 app.use(express.json());
+app.use(require('./compass-booking-guard.cjs')); // COMPASS BOOKING GUARD AUTO-INSTALLED
 
 // Serve the existing customer UI from the same origin as the API.
 // This avoids opening database APIs to arbitrary browser origins.
@@ -440,11 +473,13 @@ app.get('/api/research-traffic-scenarios', (req, res) => {
   }
 });
 
+app.use("/api/research-demo", require("./sopDemoRoutes"));
+
 // Appointment creation API.
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/employee", employeeRoutes);
 
 // Start the backend server after registering all routes.
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend running at http://localhost:${PORT}`);
 });

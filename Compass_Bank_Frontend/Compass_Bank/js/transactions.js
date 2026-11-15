@@ -23,25 +23,55 @@ function accountField(id, required) {
   return fieldRow(
     required ? 'Account Number:' : 'Account Number (if applicable):',
     `accNum_${id}`,
-    textInput(`accNum_${id}`, 'e.g. 123456789012', required, 'inputmode="numeric" maxlength="12" pattern="[0-9]{12}" data-digits-only title="Account number must be exactly 12 digits"')
+    textInput(`accNum_${id}`, 'e.g. 123456789012', required, 'inputmode="numeric" maxlength="12" pattern="(?:[0-9]{8}|[0-9]{12})" data-digits-only title="Account number must contain 8 or 12 digits"')
   );
 }
 
+function limitTransactionAmount(input) {
+  const cleaned = input.value.replace(/[^0-9.]/g, '');
+  const dot = cleaned.indexOf('.');
+  const digits = dot === -1 ? cleaned : cleaned.slice(0, dot);
+  const whole = digits.replace(/^0+(?=[0-9])/, '').slice(0, 9);
+  const decimals = dot === -1
+    ? ''
+    : cleaned.slice(dot + 1).replace(/[.]/g, '').slice(0, 2);
+
+  input.value = dot === -1
+    ? whole
+    : `${whole || '0'}.${decimals}`;
+}
 function amountField(id, label) {
   return fieldRow(
     label,
     `amount_${id}`,
     `<span class="absolute left-4 top-3 text-gray-500 font-bold">₱</span>
-     <input type="number" id="amount_${id}" required step="0.01" min="1" placeholder="0.00"
+     <input type="text" id="amount_${id}" required inputmode="decimal" maxlength="12" pattern="(?:0|[1-9][0-9]{0,8})(?:[.][0-9]{1,2})?" oninput="limitTransactionAmount(this)" placeholder="0.00"
        class="pill-input w-full bg-white text-gray-800 pl-9 pr-5 py-3 text-base border-none font-sans font-medium">`
   );
 }
 
 function checkNumberField(id) {
-  return fieldRow('Check Number:', `checkNum_${id}`, textInput(`checkNum_${id}`, 'e.g. 98765', true));
+  return fieldRow('Check Number:', `checkNum_${id}`, textInput(`checkNum_${id}`, 'e.g. 12345678', true, 'inputmode="numeric" minlength="4" maxlength="12" pattern="[0-9]{4,12}" oninput="this.value=this.value.replace(/[^0-9]/g, String()).slice(0, 12)" title="Enter 4 to 12 digits"'));
 }
 
+const MAX_BOOKING_TRANSACTIONS = 10;
+
+function updateTransactionButton() {
+  const container = document.getElementById('transactionsContainer');
+  const button = document.querySelector('button[onclick="addTransactionCard()"]');
+
+  if (!container || !button) return;
+
+  const full = container.children.length >= MAX_BOOKING_TRANSACTIONS;
+
+  button.disabled = full;
+  button.style.opacity = full ? '0.5' : '1';
+  button.style.cursor = full ? 'not-allowed' : 'pointer';
+  button.title = full ? 'Maximum of 10 transactions per appointment' : '';
+}
 function addTransactionCard() {
+  const existing = document.getElementById('transactionsContainer');
+  if (existing.children.length >= MAX_BOOKING_TRANSACTIONS) return;
   transactionCount++;
   const id = transactionCount;
   const container = document.getElementById('transactionsContainer');
@@ -81,11 +111,13 @@ function addTransactionCard() {
   `;
 
   container.appendChild(card);
+  updateTransactionButton();
 }
 
 function removeTransactionCard(id) {
   const card = document.getElementById(`transactionCard_${id}`);
   if (card) card.remove();
+  updateTransactionButton();
 }
 
 function onTypeChange(id) {
@@ -144,6 +176,35 @@ function onTypeChange(id) {
            + amountField(id, 'Amount to Pay:')
            + checkNumberField(id);
       break;
+  }
+
+  if (
+    type === 'Pay Bills – Cash' ||
+    type === 'Pay Bills – Check'
+  ) {
+    html += fieldRow(
+      'Billing Account / Reference Number:',
+      `billRef_${id}`,
+      textInput(
+        `billRef_${id}`,
+        'Enter billing reference',
+        true,
+        'maxlength="30" autocomplete="off" pattern="[A-Za-z0-9-]{4,30}" title="4 to 30 letters, numbers, or hyphens"'
+      )
+    );
+  }
+
+  if (type !== 'Account Service') {
+    html += fieldRow(
+      'Account Holder / Named Party:',
+      `accountHolder_${id}`,
+      textInput(
+        `accountHolder_${id}`,
+        'Full name of the account holder or named party',
+        true,
+        'maxlength="100" autocomplete="off"'
+      )
+    );
   }
 
   fieldsContainer.innerHTML = html;

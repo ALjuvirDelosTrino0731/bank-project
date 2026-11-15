@@ -1,8 +1,88 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compass Bank | Real-data Model Evaluation</title><style>
-:root{--ink:#13281f;--bg:#f3f5f2;--line:#dce4dd;--muted:#5b6d61;--accent:#0e6046}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,Segoe UI,Arial}main{max-width:1100px;margin:36px auto;padding:0 18px}header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}h1{font-size:clamp(1.5rem,3vw,2.3rem);margin:.3em 0}h2{font-size:1.3rem}.sub{color:var(--muted)}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:24px;margin:20px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.stat{background:#f5f8f5;border-radius:12px;padding:17px}.stat b{display:block;font-size:2rem}.warn{border-left:5px solid #b27620;background:#fff8e9;padding:15px 18px;border-radius:10px}a{color:var(--accent)}img{display:block;width:100%;height:auto;max-width:960px;margin:12px auto}table{border-collapse:collapse;width:100%;max-width:550px}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:center}th:first-child{text-align:left}.pill{display:inline-block;padding:5px 10px;background:#f9e8ce;color:#75501b;border-radius:100px;font-weight:700;font-size:.8rem}.links a{display:inline-block;margin:5px 15px 5px 0}small{color:var(--muted)}@media print{body{background:white}.card{break-inside:avoid}}</style></head><body><main>
-<header><div><small>COMPASS BANK · EMPLOYEE RESEARCH VIEW</small><h1>Real-data ML evaluation</h1><div class="sub">Classification and regression · Held-out Week 4</div></div><a href="/employee/">← Return to employee dashboard</a></header>
-<section class="card"><div class="warn"><strong>Research evaluation only — not a validated live forecast.</strong><div>The observations come from Nigerian banks, not the Philippine branch. The source has no verified calendar dates, and the observed hours do not cover 3 PM–5 PM. This page does not update the existing forecast API or retrain models.</div></div><h2>Dataset and evaluation split</h2><div class="grid"><div class="stat">Training bank-days<b>45</b><small>Observation weeks 1–3</small></div><div class="stat">Held-out bank-days<b>15</b><small>Observation week 4</small></div><div class="stat">Observed hourly groups<b>419</b><small>Across 60 bank-days</small></div></div><p><strong>Source:</strong> Bishop et al. (2018), <em>Data in Brief</em>, DOI <a href="https://doi.org/10.1016/j.dib.2018.05.101" target="_blank" rel="noopener">10.1016/j.dib.2018.05.101</a>.</p></section>
-<section class="card"><h2>1. Daily traffic classification</h2><div class="grid"><div class="stat">Random Forest accuracy<b>40%</b><small>15 held-out bank-days</small></div><div class="stat">Majority-class baseline<b>20%</b><small>Same held-out observations</small></div></div><p><span class="pill">Exploratory — low confidence</span> The accuracy is insufficient to claim dependable daily traffic classification.</p><h3>Confusion matrix</h3><table><thead><tr><th>Actual / Predicted</th><th>Low</th><th>Moderate</th><th>High</th></tr></thead><tbody><tr><th>Low</th><td>1</td><td>2</td><td>0</td></tr><tr><th>Moderate</th><td>0</td><td>3</td><td>2</td></tr><tr><th>High</th><td>3</td><td>2</td><td>2</td></tr></tbody></table><img src="research-evaluation/confusion_matrix.png" alt="Confusion matrix for held-out Week 4 classification"></section>
-<section class="card"><h2>2. Hourly customer count regression</h2><p>The residual is <strong>observed minus predicted</strong>. A positive value means the model predicted fewer customers than were observed.</p><div class="grid"><div class="stat">Median residual<b>+9.0</b><small>Customers per observed hour</small></div><div class="stat">Mean residual<b>+5.9</b><small>Customers per observed hour</small></div></div><h3>Observed versus predicted</h3><img src="research-evaluation/actual_vs_predicted.png" alt="Observed versus predicted hourly customer counts on held-out Week 4"><h3>Residual distribution</h3><img src="research-evaluation/residual_distribution.png" alt="Distribution of observed minus predicted customer counts"></section>
-<section class="card"><h2>Evidence downloads</h2><div class="links"><a download href="research-evaluation/classification_holdout.csv">Classification test records (CSV)</a><a download href="research-evaluation/regression_holdout.csv">Regression test records (CSV)</a><a download href="research-evaluation/real_data_evaluation.json">Full evaluation report (JSON)</a></div><h2>Important limitations</h2><ul><li>Three arrival-time records are invalid and excluded; three daily totals differ by one from the published counts.</li><li>Numeric H.MM conversions still require source-format verification.</li><li>Observations are grouped by bank, week, weekday and hour; exact calendar dates are unavailable.</li><li>The study describes customers served; arrivals and served customers are not necessarily identical.</li><li>60 bank-days are a small forecasting sample. Predictions are not validated for the Philippine branch.</li></ul><p><strong>Defense wording:</strong> “We evaluated both models on a held-out observation week using published real banking observations. The results demonstrate the algorithms' operation, but do not establish reliable calendar-date predictions for our selected Philippine branch.”</p></section>
-</main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compass Bank | Real-data ML Evaluation</title><style>body{background:#f4f5f3;color:#14281d;font:15px/1.6 Inter,Segoe UI,Arial;margin:0}main{max-width:1000px;margin:30px auto;padding:20px}.card{background:white;border:1px solid #e4e9e4;border-radius:19px;padding:24px;margin-bottom:18px}h1,h2{font-family:Georgia,serif}.metrics{display:flex;gap:14px;flex-wrap:wrap}.metric{background:#f5f7f5;padding:15px 20px;border-radius:14px;min-width:145px}.metric b{font-size:25px;display:block}.warn{background:#fff7e8;border-left:4px solid #a96b22;padding:13px;border-radius:8px}img{display:block;max-width:100%;margin:auto}table{border-collapse:collapse}td,th{padding:10px 17px;border-bottom:1px solid #ddd;text-align:center}a{color:#68459b}</style>
+<style>/* COMPASS_EVAL_CONSOLIDATED_V1 */
+html.compass-embedded body {background:transparent!important;color:#111827!important;font-family:Inter,'Segoe UI',Arial,sans-serif!important;font-size:14px!important}
+html.compass-embedded main {max-width:none!important;width:100%!important;padding:0!important;margin:0!important}
+html.compass-embedded main>h1, html.compass-embedded main>p:first-of-type {display:none!important}
+html.compass-embedded h2, html.compass-embedded h3 {font-family:Merriweather,Georgia,serif!important;color:#111827!important}
+html.compass-embedded .card {background:#fff!important;border:1px solid #e5e7eb!important;border-radius:22px!important;box-shadow:0 5px 12px rgba(17,24,39,.06)!important;padding:24px!important;margin:0 0 16px!important}
+html.compass-embedded .metric {background:#f8faf8!important;border:1px solid #f1f3f1!important;border-radius:16px!important}
+html.compass-embedded .warn {background:#fff8e8!important;border-left:4px solid #d49a2a!important;border-radius:12px!important;padding:15px 17px!important;margin-bottom:18px!important}
+html.compass-embedded img {width:100%!important;max-width:900px!important;height:auto!important;display:block!important;margin:16px auto!important}
+html.compass-embedded table {max-width:100%!important}
+html.compass-embedded a {color:#8050b0!important}
+@media(max-width:650px){html.compass-embedded .card{padding:16px!important}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
+<script>if (window.parent !== window) document.documentElement.classList.add('compass-embedded');</script>
+
+<script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
+</head><body><main><h1>Real-data ML evaluation</h1><p>Reconstructed from the supplied Nigerian bank research workbooks (Bishop et al., 2018; DOI: <a href="https://doi.org/10.1016/j.dib.2018.05.101" target="_blank" rel="noopener">10.1016/j.dib.2018.05.101</a>), not a validated Philippine branch forecast. Original workbook time interpretation requires independent review.</p><div class="warn"><strong>Research only.</strong> The original observations do not establish real calendar dates; the model uses bank and weekday, not Philippine holidays or dates. Source-time formats require verification before scientific publication.</div><section class="card"><h2>Dataset and holdout</h2><div class="metrics"><div class="metric">Training days <b>45</b></div><div class="metric">Holdout days <b>15</b></div><div class="metric">Hourly groups <b>419</b></div></div></section><section class="card"><h2>Classification</h2><div class="metrics"><div class="metric">Accuracy <b>40.0%</b></div><div class="metric">Majority baseline <b>46.7%</b></div></div><h3>Confusion matrix</h3><table><tr><th>Actual / predicted</th><th>Low</th><th>Moderate</th><th>High</th></tr><tr><th>Low</th><td>1</td><td>2</td><td>0</td></tr><tr><th>Moderate</th><td>0</td><td>3</td><td>2</td></tr><tr><th>High</th><td>3</td><td>2</td><td>2</td></tr></table><img src="research-evaluation/confusion_matrix.png" alt="Confusion matrix"></section><section class="card"><h2>Regression</h2><div class="metrics"><div class="metric">Median residual <b>8.9</b></div><div class="metric">Mean residual <b>5.9</b></div></div><h3>Observed versus predicted</h3><img src="research-evaluation/actual_vs_predicted.png" alt="Observed versus predicted chart"><h3>Residual distribution</h3><img src="research-evaluation/residual_distribution.png" alt="Regression residual distribution"></section><section class="card"><h2>Source evidence</h2><a href="research-evaluation/classification_holdout.csv">Classification holdout CSV</a> · <a href="research-evaluation/regression_holdout.csv">Regression holdout CSV</a> · <a href="research-evaluation/real_data_evaluation.json">Evaluation JSON</a><p>Generated from the provided source, not live customer visits. Training Weeks 1–3; test Week 4. Models: Random Forest, 200 trees each.</p></section></main>
+<script defer src="./compass-admin-remove-notices.js?v=20261115154955"></script>
+
+<script defer src="./compass-admin-remove-two-sections.js?v=20261115155845"></script>
+
+<script defer src="./compass-readable-graphs.js?v=20261115161333"></script>
+<script id="compass-sop5-ui-removal-v2">
+(function () {
+  'use strict';
+  if (window.CompassSOP5Removal && window.CompassSOP5Removal.installed) return;
+
+  function normalized(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+  function headingMatches(el) {
+    const t = normalized(el.textContent);
+    return (/^SOP\s*5\b/i.test(t) && /anonymous system evaluation/i.test(t)) ||
+           /^anonymous system evaluation$/i.test(t);
+  }
+  function isOtherSopHeading(el) {
+    return /^SOP\s*[1-4]\b/i.test(normalized(el.textContent));
+  }
+  function findOnlySop5Card(heading) {
+    let parent = heading.parentElement;
+    for (let depth = 0; depth < 9 && parent; depth++, parent = parent.parentElement) {
+      if (parent === document.body || parent === document.documentElement) break;
+      const headings = Array.from(parent.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      if (headings.some(el => el !== heading && isOtherSopHeading(el))) break;
+      const hasEvaluationFields = parent.querySelectorAll('select').length >= 2;
+      const hasSubmit = Array.from(parent.querySelectorAll('button,input[type="submit"]'))
+        .some(el => /submit anonymous evaluation/i.test(normalized(el.textContent || el.value)));
+      if (hasEvaluationFields || hasSubmit) return parent;
+    }
+    return null;
+  }
+  function removeSop5Only() {
+    let count = 0;
+    Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(heading => {
+      if (!heading.isConnected || !headingMatches(heading)) return;
+      const card = findOnlySop5Card(heading);
+      if (card) { card.remove(); count++; }
+    });
+    Array.from(document.querySelectorAll('a,button,li')).forEach(el => {
+      if (!el.isConnected) return;
+      const t = normalized(el.textContent);
+      if (t.length < 100 && /^SOP\s*5\b/i.test(t) && /evaluation/i.test(t)) {
+        el.remove(); count++;
+      }
+    });
+    return count;
+  }
+
+  let changes = 0;
+  function run() { changes += removeSop5Only(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else { run(); }
+  const observer = new MutationObserver(function (mutations) {
+    if (mutations.some(m => m.addedNodes.length > 0)) run();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.CompassSOP5Removal = {
+    installed: true,
+    run: run,
+    get removedCount() { return changes; }
+  };
+})();
+</script>
+</body></html>

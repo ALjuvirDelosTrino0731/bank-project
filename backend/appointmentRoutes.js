@@ -14,8 +14,89 @@ const {
 } = require("./bookingValidation");
 
 const router = express.Router();
+// COMPASS_APPOINTMENT_OWNERSHIP_V1
+const appointmentOwnership = require('./appointmentOwnership');
+router.use("/access", appointmentOwnership.router);
 
 const BRANCH_ID = 1;
+// COMPASS_SERVER_VALIDATION_V1
+// Validate structured details encoded by the current customer form.
+
+// This checks booking requests only: no financial transaction is executed.
+function validateBankServiceDetails(service, note) {
+  if (!service || typeof note !== 'string' || note.length > 500 || note.includes(' | '))
+    return 'Invalid service or description';
+  const requiresHolder = ![
+    'Savings Account Opening',
+    'Checking Account Opening',
+    'Time Deposit Account Opening'
+  ].includes(service);
+
+  const holderMatch = requiresHolder
+    ? note.match(/ — Holder: ([\p{L}][\p{L}\p{M} .'-]{1,99})$/u)
+    : null;
+
+  if (requiresHolder && (
+    !holderMatch || holderMatch[1].trim().length < 2
+  )) {
+    return 'Provide a valid account holder or named party';
+  }
+
+  const baseNote = holderMatch
+    ? note.slice(0, -holderMatch[0].length)
+    : note;
+
+  const requiresBillReference = [
+    'Bill Payment - Cash',
+    'Bill Payment - Check'
+  ].includes(service);
+
+  const billRefMatch = requiresBillReference
+    ? baseNote.match(/ \u2014 Bill Ref: \.\.\.[A-Za-z0-9-]{4}$/u)
+    : null;
+
+  if (requiresBillReference && !billRefMatch) {
+    return 'Provide a valid masked billing reference';
+  }
+
+  const serviceNote = billRefMatch
+    ? baseNote.slice(0, -billRefMatch[0].length)
+    : baseNote;
+
+  const amountPattern = String.raw`₱([0-9]{1,9})\.([0-9]{2})`;
+  const amount = serviceNote.match(new RegExp(amountPattern));
+  if (service !== 'Savings Account Opening' &&
+      service !== 'Checking Account Opening' &&
+      service !== 'Time Deposit Account Opening') {
+    if (!amount || (BigInt(amount[1]) === 0n && amount[2] === '00'))
+      return 'Enter a valid amount (up to 9 digits and two decimals)';
+  }
+  const acc = String.raw`\(Acc: \.\.\.[0-9]{4}\)`;
+  const check = String.raw`\[Check #[0-9]{4,12}\]`;
+  const rules = {
+    'Cash Deposit': new RegExp('^Deposit Cash: ' + amountPattern + ' ' + acc + '$','u'),
+    'Cash Withdrawal': new RegExp('^Withdraw Cash: ' + amountPattern + ' ' + acc + '$','u'),
+    'Check Deposit': new RegExp('^Deposit Check: ' + amountPattern + ' ' + acc + ' ' + check + '$','u'),
+    'Check Withdrawal': new RegExp('^Withdraw Check: ' + amountPattern + ' ' + acc + ' ' + check + '$','u'),
+    'Manager\'s Check': new RegExp("^Manager's Check: " + amountPattern + ' ' + acc + ' — Payee: (.{1,150})$','u'),
+    'Bill Payment - Cash': new RegExp('^Pay Bills – Cash: ' + amountPattern + ' — (.{1,150})(?: ' + acc + ')?$','u'),
+    'Bill Payment - Check': new RegExp('^Pay Bills – Check: ' + amountPattern + ' — (.{1,150}) ' + check + '$','u'),
+    'Savings Account Opening': /^Account Service: Savings Account Opening$/u,
+    'Checking Account Opening': /^Account Service: Checking Account Opening$/u,
+    'Time Deposit Account Opening': /^Account Service: Time Deposit Account Opening$/u
+  };
+  const match = rules[service]?.exec(serviceNote);
+  if (!match) return 'Transaction details do not match the selected service';
+  if (['Manager\'s Check','Bill Payment - Cash','Bill Payment - Check'].includes(service)) {
+    const name = match[3] || '';
+    if (!/\p{L}/u.test(name)) return 'Payee or institution name must contain letters';
+  }
+  return null;
+}
+
+
+
+
 
 function getManilaDateTime() {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -49,6 +130,20 @@ function isFutureBooking(date, time) {
   );
 }
 
+function isWithinBookingWindow(date) {
+  if (!isValidDateFormat(date)) return false;
+
+  const today = getManilaDateTime().date;
+  const start = Date.parse(today + "T00:00:00Z");
+  const requested = Date.parse(date + "T00:00:00Z");
+  const daysAhead = Math.round(
+    (requested - start) / 86400000
+  );
+
+  return Number.isFinite(daysAhead) &&
+    daysAhead >= 0 && daysAhead <= 13;
+}
+
 function validateRequest(body) {
   if (
     !body ||
@@ -71,7 +166,7 @@ function validateRequest(body) {
   if (
     typeof full_name !== "string" ||
     full_name.trim().length < 2 ||
-    full_name.trim().length > 150
+    full_name.trim().length > 150 || !/\p{L}/u.test(full_name)
   ) {
     return "Full name must contain 2 to 150 characters";
   }
@@ -107,6 +202,10 @@ function validateRequest(body) {
     return "Appointment must be in the future";
   }
 
+  if (!isWithinBookingWindow(appointment_date)) {
+    return "Appointments must be within the next 14 calendar days";
+  }
+
   if (
     !Array.isArray(service_ids) ||
     service_ids.length === 0 ||
@@ -115,11 +214,7 @@ function validateRequest(body) {
       (id) => Number.isSafeInteger(id) && id > 0
     )
   ) {
-    return "Select between 1 and 10 valid banking services";
-  }
-
-  if (new Set(service_ids).size !== service_ids.length) {
-    return "Duplicate banking services are not allowed";
+    return "Select between 1 and 10 valid banking transactions";
   }
 
   if (
@@ -127,10 +222,10 @@ function validateRequest(body) {
     customer_notes !== null &&
     (
       typeof customer_notes !== "string" ||
-      customer_notes.length > 1000
+      customer_notes.length > 5090
     )
   ) {
-    return "Customer notes must not exceed 1000 characters";
+    return "Combined transaction descriptions must not exceed 5090 characters";
   }
 
   return null;
@@ -279,18 +374,28 @@ router.post("/", async (req, res) => {
       });
     }
 
+    // Recheck the booking window after waiting for a database lock.
+    if (!isWithinBookingWindow(appointment_date)) {
+      await connection.rollback();
+      return res.status(400).json({
+        status: "error",
+        message: "Appointments must be within the next 14 calendar days"
+      });
+    }
+
     // Verify that every selected service is active.
-    const placeholders = service_ids.map(() => "?").join(",");
+    const uniqueServiceIds = [...new Set(service_ids)];
+    const placeholders = uniqueServiceIds.map(() => "?").join(",");
 
     const [services] = await connection.query(
-      `SELECT service_id
+      `SELECT service_id, service_name
        FROM services
        WHERE is_active = 1
          AND service_id IN (${placeholders})`,
-      service_ids
+      uniqueServiceIds
     );
 
-    if (services.length !== service_ids.length) {
+    if (services.length !== uniqueServiceIds.length) {
       await connection.rollback();
 
       return res.status(400).json({
@@ -298,6 +403,25 @@ router.post("/", async (req, res) => {
         message: "One or more banking services are unavailable"
       });
     }
+
+    // Server-side checks for each booked banking service. Never trust browser limits.
+
+    const descriptionPieces = typeof customer_notes === 'string'
+      ? customer_notes.split(' | ').map(x => x.trim()) : [];
+    if (descriptionPieces.length !== service_ids.length ||
+        descriptionPieces.some(x => !x)) {
+      await connection.rollback();
+      return res.status(400).json({status:'error',message:'Provide one valid description per selected service'});
+    }
+    const bankServices = new Map(services.map(s => [Number(s.service_id), s.service_name]));
+    for (let i = 0; i < service_ids.length; i++) {
+      const problem = validateBankServiceDetails(bankServices.get(service_ids[i]), descriptionPieces[i]);
+      if (problem) {
+        await connection.rollback();
+        return res.status(400).json({status:'error',message:`Service ${i + 1}: ${problem}`});
+      }
+    }
+
 
     // Count appointments in the requested slot.
     const [countRows] = await connection.query(`
@@ -324,6 +448,26 @@ router.post("/", async (req, res) => {
       });
     }
 
+    // Client feedback: maximum 20 scheduled customers per hour.
+    // Protected by the branch_settings FOR UPDATE lock above.
+    const [hourlyRows] = await connection.query(`
+      SELECT COUNT(*) AS total
+      FROM appointments
+      WHERE appointment_date = ?
+        AND HOUR(appointment_time) = HOUR(CAST(? AS TIME))
+        AND status IN ('pending', 'confirmed', 'checked_in')
+    `, [appointment_date, appointment_time]);
+
+    const hourlyBooked = Number(hourlyRows[0].total);
+
+    if (!Number.isInteger(hourlyBooked) || hourlyBooked >= 20) {
+      await connection.rollback();
+      return res.status(409).json({
+        status: "error",
+        message: "This hour has reached the maximum of 20 scheduled customers"
+      });
+    }
+
     // Create the customer.
     const [customerResult] = await connection.query(`
       INSERT INTO customers
@@ -340,7 +484,7 @@ router.post("/", async (req, res) => {
     // Generate a unique reference number.
     const referenceNumber = `CB-${randomUUID()}`;
 
-    // Create a pending appointment.
+    // Automatically confirm a valid appointment.
     const [appointmentResult] = await connection.query(`
       INSERT INTO appointments
         (
@@ -350,7 +494,7 @@ router.post("/", async (req, res) => {
           appointment_time,
           status
         )
-      VALUES (?, ?, ?, ?, 'pending')
+      VALUES (?, ?, ?, ?, 'confirmed')
     `, [
       customerId,
       referenceNumber,
@@ -360,16 +504,40 @@ router.post("/", async (req, res) => {
 
     const appointmentId = appointmentResult.insertId;
 
-    // Connect all selected services to the appointment.
-    for (const serviceId of service_ids) {
+    // Store one transaction description for each selected service.
+    const submittedNotes = typeof customer_notes === "string"
+      ? customer_notes.trim() : "";
+
+    const separatedNotes = submittedNotes
+      ? submittedNotes.split(" | ") : [];
+
+    const notesPerService =
+      separatedNotes.length === service_ids.length
+        ? separatedNotes
+        : service_ids.length === 1 ? [submittedNotes] : [];
+
+    if (
+      service_ids.length > 1 &&
+      submittedNotes &&
+      notesPerService.length !== service_ids.length
+    ) {
+      await connection.rollback();
+
+      return res.status(400).json({
+        status: "error",
+        message: "Provide one transaction description for each selected banking service"
+      });
+    }
+
+    for (let i = 0; i < service_ids.length; i++) {
       await connection.query(`
         INSERT INTO appointment_transactions
           (appointment_id, service_id, customer_notes)
         VALUES (?, ?, ?)
       `, [
         appointmentId,
-        serviceId,
-        customer_notes || null
+        service_ids[i],
+        notesPerService[i] || null
       ]);
     }
 
@@ -383,26 +551,48 @@ router.post("/", async (req, res) => {
           changed_by_employee_id,
           change_reason
         )
-      VALUES (?, NULL, 'pending', NULL, ?)
+      VALUES (?, NULL, 'confirmed', NULL, ?)
     `, [
       appointmentId,
-      "Appointment created; email verification pending"
+      "Appointment automatically confirmed upon successful booking"
     ]);
 
     // Save all changes together.
     await connection.commit();
 
+    // Send the confirmation email only after successful database commit.
+    // Test addresses must not trigger outgoing SMTP messages.
+    const recipientEmail = email.trim().toLowerCase();
+    const isTestRecipient = /@example\.(com|org|net)$/i.test(recipientEmail);
+
+    if (!isTestRecipient) {
+      setImmediate(() => {
+        Promise.resolve()
+          .then(() => require("./appointmentApprovalMail")
+            .sendApprovedAppointment(referenceNumber))
+          .then(result => {
+            console.log("Automatic confirmation email:", result);
+          })
+          .catch(error => {
+            console.error(
+              "Automatic confirmation email error:",
+              error.code || error.message
+            );
+          });
+      });
+    }
+
     return res.status(201).json({
       status: "ok",
-      message: "Pending appointment created successfully",
+      message: "Appointment automatically confirmed successfully",
       appointment: {
         appointment_id: appointmentId,
         reference_number: referenceNumber,
         appointment_date,
         appointment_time,
-        status: "pending",
+        status: "confirmed",
         service_ids,
-        email_verification_required: true
+        email_verification_required: false
       }
     });
 
@@ -444,6 +634,40 @@ function validReference(value) {
 function validContact(value) {
   return typeof value === "string" && value.trim().length >= 3 && value.length <= 254;
 }
+
+// Customer-accessible QR is issued only after reference + registered contact match.
+// This provides a fallback when SMTP delivery is not configured.
+// Require verified email ownership for customer appointment management when enforced.
+router.use(["/qr", "/lookup", "/cancel"], appointmentOwnership.requireVerifiedAccess);
+router.post("/qr", async (req, res) => {
+  const {reference_number, contact} = req.body || {};
+  if (!validReference(reference_number) || !validContact(contact)) {
+    return res.status(400).json({status:"error", message:"Invalid reference or contact"});
+  }
+  try {
+    const [rows] = await db.query(`
+      SELECT a.reference_number, a.status
+      FROM appointments a
+      JOIN customers c ON c.customer_id = a.customer_id
+      WHERE a.reference_number = ?
+        AND (LOWER(c.email) = ? OR c.phone_number = ?)
+      LIMIT 1
+    `, [reference_number, contact.trim().toLowerCase(), contact.trim()]);
+    if (!rows.length) return res.status(404).json({status:"error",message:"Appointment not found"});
+    if (!['confirmed','checked_in','completed'].includes(rows[0].status)) {
+      return res.status(409).json({status:"error",message:"QR unavailable for this appointment status"});
+    }
+    const QRCode = require('qrcode');
+    const image = await QRCode.toDataURL(reference_number, {
+      width: 260, margin: 2, errorCorrectionLevel: 'M'
+    });
+    res.set('Cache-Control','no-store');
+    return res.json({status:"ok",qr_data_url:image,reference_number});
+  } catch(error) {
+    console.error('Appointment QR:',error.code||error.message);
+    return res.status(500).json({status:"error",message:"Unable to generate appointment QR"});
+  }
+});
 
 router.post("/lookup", async (req, res) => {
   const { reference_number, contact } = req.body || {};
