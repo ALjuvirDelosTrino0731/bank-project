@@ -14,7 +14,13 @@ if (onCloud && !stage) {
 const username = String(process.env.COMPASS_STAGING_USERNAME || '');
 const password = String(process.env.COMPASS_STAGING_PASSWORD || '');
 if (stage && (username.length < 4 || password.length < 20 || username.includes(':'))) {
-  throw new Error('Compass staging gate: configure a username (4+ chars) and password (20+ chars) before serving requests.');
+  throw new Error('Compass staging diagnostic: ' + JSON.stringify({
+    usernameReceived: username.length > 0,
+    usernameLengthOK: username.length >= 4,
+    usernameContainsColon: username.includes(':'),
+    passwordReceived: password.length > 0,
+    passwordLengthOK: password.length >= 20
+  }));
 }
 const COOKIE_NAME = 'compass_staging_access';
 const SESSION_SECONDS = 8 * 60 * 60;
