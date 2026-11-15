@@ -86,7 +86,25 @@
       if (currentRun !== refreshNumber || !button.isConnected || button.dataset.compassDate !== date) return;
       const slots = availability.available_slots;
       if (!slots.some(slot => Number(slot.remaining_capacity) > 0)) {
-        setDateUnavailable(button, availability.message && /clos/i.test(availability.message) ? 'Closed' : 'No open slots');
+        if (/booking is currently disabled/i.test(availability.message || '')) {
+          // The staging database intentionally disables customer bookings.
+          // Show a clearly labelled research preview, not fake open slots.
+          setDateUnavailable(button, 'Staging: bookings paused');
+          try {
+            const forecast = await getForecast(date);
+            if (currentRun !== refreshNumber || !button.isConnected ||
+                button.dataset.compassDate !== date) return;
+            const category = forecast.traffic_category;
+            button.classList.add('comp-traffic-' + category.toLowerCase());
+            if (info) info.textContent = category + ' (simulated; bookings paused)';
+            button.title = 'Research-only simulated traffic; appointment bookings are disabled in staging.';
+          } catch (_) {
+            // Keep the truthful disabled label even when forecasting is unavailable.
+          }
+        } else {
+          setDateUnavailable(button,
+            availability.message && /clos/i.test(availability.message) ? 'Closed' : 'No open slots');
+        }
         return;
       }
       const forecast = await getForecast(date);
