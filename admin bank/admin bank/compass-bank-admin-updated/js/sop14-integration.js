@@ -83,7 +83,7 @@
       </div>
       <a class="es14-link" href="/employee/regression-validation.html">Open detailed SOP 3 evaluation: dates, residual table, live model validation</a>
     </div>
-    <p class="es14-small">Pre-visit classifier accuracy was 24.24% on simulated holdout; the 72.73% early-day result is exploratory. Eight slot clock times are unverified. Never infer actual 9 AM–5 PM hourly traffic or staffing requirements from these models.</p>`;
+`;
   const top=traffic.firstElementChild;
   if(top)top.insertAdjacentElement('afterend',card);
   else traffic.append(card);
@@ -119,7 +119,7 @@
       const d=await request('forecast',{date:validDate()});
       text('es14-class','');const clas=el('es14-class');
       clas.append(node('div',d.traffic_category+' traffic','es14-big'),node('p','Model category probability: '+probability(d)));
-      clas.append(node('p','Calendar-only simulated test accuracy: 24.24%. Not validated on live branch traffic.','es14-small'));
+
       const dest=el('es14-reg');dest.replaceChildren();
       if(!Array.isArray(d.estimated_slots)||d.estimated_slots.length!==8)throw Error('Model did not return eight slots');
       dest.append(node('div','Total of predicted slots: '+d.estimated_slot_count_total,'es14-big'));
@@ -130,7 +130,7 @@
         const bar=node('div','','es14-track');const fill=node('span','','es14-fill');fill.style.width=Math.max(0,Math.min(100,val/max*100))+'%';
         bar.append(fill);row.append(bar,node('span',val.toFixed(1)));list.append(row);
       });
-      dest.append(list,node('p','Numbered slots have no verified clock hours.','es14-small'));
+      dest.append(list);
     }catch(e){text('es14-class','Unavailable: '+e.message);text('es14-reg','No validated estimate.');}
     finally{btnForecast.disabled=false;}
   });
@@ -141,7 +141,7 @@
       text('es14-nowcast-out','Enter three nonnegative whole-number slot counts, up to 10000.');return;
     }
     btnNow.disabled=true;text('es14-nowcast-out','Running trained early-day classifier…');
-    try{const d=await request('nowcast',{...params,date:validDate()});text('es14-nowcast-out','Early-day estimate: '+d.traffic_category+' | Model category probability: '+probability(d)+' | Simulation only; requires prior slot observations.');}
+    try{const d=await request('nowcast',{...params,date:validDate()});text('es14-nowcast-out','Early-day estimate: '+d.traffic_category+' | Model category probability: '+probability(d));}
     catch(e){text('es14-nowcast-out','Unavailable: '+e.message);}
     finally{btnNow.disabled=false;}
   });

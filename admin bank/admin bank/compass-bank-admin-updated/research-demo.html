@@ -6,7 +6,7 @@
 </style>
 <script defer src="compass-ui-label-cleanup.js?v=20261115153707"></script>
 </head>
-<body data-role="employee"><header><h1>Compass Bank — ML Research Demonstration</h1><p>Integrated classification, regression, and ISO-oriented system evaluation</p><nav><a href="/customer/">Customer scheduling</a><a href="/employee/">Employee dashboard</a><a href="/employee/regression-validation.html">SOP 3 detailed validation</a></nav></header>
+<body data-role="employee"><header><h1>Compass Bank — ML Research Demonstration</h1><p>Integrated classification, regression, and ISO-oriented system evaluation</p><nav><a href="/employee/">Employee dashboard</a><a href="/employee/regression-validation.html">SOP 3 detailed validation</a></nav></header>
 <main>
 <div class="notice"><strong>Research prototype — not a live bank traffic service.</strong> The models use simulated 2026 records based on an external teller-queue source. No real Philippine-branch traffic accuracy has been established. Time slots are numbered because their original clock times are unverified.</div>
 <div class="cols">
@@ -23,8 +23,8 @@ const el=id=>document.getElementById(id);const role=document.body.dataset.role;
 const text=(id,str)=>{el(id).textContent=str;};
 async function request(url,opt){const r=await fetch(url,opt);let data;try{data=await r.json();}catch{throw Error('Invalid server response');}if(!r.ok||data.status!=='ok')throw Error(data.message||'Request failed');return data;}
 const pct=x=>(x*100).toFixed(2)+'%';
-function forecastMsg(d){return 'Daily class: '+d.traffic_category+'\nClass probabilities: '+Object.entries(d.class_probabilities).map(([k,v])=>k+' '+pct(v)).join(', ')+'\n\nPredicted slot counts (1 to 8): '+d.estimated_slots.map(s=>s.slot+': '+s.estimated_count).join(' | ')+'\nSum of predicted slots: '+d.estimated_slot_count_total+'\n\n'+d.warning;}
-function nowcastMsg(d){return 'Early-day class: '+d.traffic_category+'\nClass probabilities: '+Object.entries(d.class_probabilities).map(([k,v])=>k+' '+pct(v)).join(', ')+'\n\n'+d.warning;}
+function forecastMsg(d){return 'Daily class: '+d.traffic_category+'\nClass probabilities: '+Object.entries(d.class_probabilities).map(([k,v])=>k+' '+pct(v)).join(', ')+'\n\nPredicted slot counts (1 to 8): '+d.estimated_slots.map(s=>s.slot+': '+s.estimated_count).join(' | ')+'\nSum of predicted slots: '+d.estimated_slot_count_total;}
+function nowcastMsg(d){return 'Early-day class: '+d.traffic_category+'\nClass probabilities: '+Object.entries(d.class_probabilities).map(([k,v])=>k+' '+pct(v)).join(', ');}
 async function handle(btnId,outId,url,mapper){const btn=el(btnId);btn.disabled=true;text(outId,'Running trained Random Forest...');try{const d=await request(url);text(outId,mapper(d));}catch(e){text(outId,'Error: '+e.message);}finally{btn.disabled=false;}}
 el('runForecast').addEventListener('click',()=>handle('runForecast','forecastResult','/api/research-demo/forecast?'+new URLSearchParams({date:el('date').value}),forecastMsg));
 el('runNowcast').addEventListener('click',()=>handle('runNowcast','nowcastResult','/api/research-demo/nowcast?'+new URLSearchParams({date:el('date').value,slot1:el('s1').value,slot2:el('s2').value,slot3:el('s3').value}),nowcastMsg));
